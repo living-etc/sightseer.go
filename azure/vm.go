@@ -71,7 +71,7 @@ func (vm VM) commandOverSSH(command string) (string, error) {
 	check(err, "Unable to open SSH session")
 	defer session.Close()
 
-	cmd := fmt.Sprintf(command)
+	cmd := fmt.Sprintf("echo -n $( %v )", command)
 
 	var b bytes.Buffer
 	session.Stdout = &b
@@ -83,7 +83,7 @@ func (vm VM) commandOverSSH(command string) (string, error) {
 }
 
 func (vm VM) Hostname() string {
-	output, err := vm.commandOverSSH("echo -n $( hostname -s )")
+	output, err := vm.commandOverSSH("hostname -s")
 	check(err, "Error occurred running command over SSH")
 	return output
 }
@@ -98,4 +98,18 @@ func (vm VM) HasFile(filename string) bool {
 	}
 
 	return true
+}
+
+type Service struct {
+	IsActive string
+}
+
+func (vm VM) Service(name string) Service {
+	command := fmt.Sprintf("systemctl is-active %v", name)
+	output, err := vm.commandOverSSH(command)
+	check(err, "Error encountered checking service status")
+
+	return Service{
+		IsActive: output,
+	}
 }
