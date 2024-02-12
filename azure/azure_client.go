@@ -2,6 +2,7 @@ package azure
 
 import (
 	"context"
+	"log"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -9,10 +10,22 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v2"
 )
 
+func check(err error, message string) {
+	if err != nil {
+		log.Fatalf("%v: %v", message, err)
+	}
+}
+
 type AzureClient struct {
 	subscriptionId    string
 	resourceGroupName string
 	credential        *azidentity.DefaultAzureCredential
+}
+
+type VM struct {
+	PrivateIPAddress string
+	PublicIPAddress  string
+	DnsName          string
 }
 
 func NewAzureClient(subscriptionId string, resourceGroupName string) AzureClient {
