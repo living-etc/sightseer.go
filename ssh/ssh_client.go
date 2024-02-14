@@ -16,7 +16,16 @@ func check(err error, message string) {
 }
 
 type SshClient struct {
+	client   *ssh.Client
+	executor CommandExecutor
+}
+
+type RealCommandExecutor struct {
 	client *ssh.Client
+}
+
+type CommandExecutor interface {
+	ExecuteCommand(command string) (string, error)
 }
 
 func NewSshClient(privateKey []byte, host string) (SshClient, error) {
@@ -34,7 +43,8 @@ func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 	client, err := ssh.Dial("tcp", host+":22", config)
 
 	sshClient := SshClient{
-		client: client,
+		client:   client,
+		executor: RealCommandExecutor{client: client},
 	}
 
 	return sshClient, nil
@@ -42,7 +52,7 @@ func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 
 func (sshClient SshClient) HasFile(filename string) bool {
 	command := fmt.Sprintf("test -f %v", filename)
-	_, err := sshClient.commandOverSSH(command)
+	_, err := sshClient.executor.ExecuteCommand(command)
 	check(err, "Error occurred running command over SSH")
 
 	if err != nil {
@@ -52,20 +62,22 @@ func (sshClient SshClient) HasFile(filename string) bool {
 	return true
 }
 
-//func (sshclient SshClient) File(filename string) (File, error) {
-//	command := fmt.Sprintf("stat %v", filename)
-//	output, err := sshclient.commandOverSSH(command)
-//	check(err, "")
-//}
+func (sshclient SshClient) File(filename string) (File, error) {
+	command := fmt.Sprintf("stat %v", filename)
+	_, err := sshclient.executor.ExecuteCommand(command)
+	check(err, "")
+
+	return File{}, nil
+}
 
 func (sshClient SshClient) Hostname() string {
-	output, err := sshClient.commandOverSSH("hostname -s")
+	output, err := sshClient.executor.ExecuteCommand("hostname -s")
 	check(err, "Error occurred running command over SSH")
 	return output
 }
 
-func (sshClient SshClient) commandOverSSH(command string) (string, error) {
-	session, err := sshClient.client.NewSession()
+func (executor RealCommandExecutor) ExecuteCommand(command string) (string, error) {
+	session, err := executor.client.NewSession()
 	check(err, "Unable to open SSH session")
 	defer session.Close()
 
@@ -86,7 +98,7 @@ type Service struct {
 
 func (sshClient SshClient) Service(name string) Service {
 	command := fmt.Sprintf("systemctl is-active %v", name)
-	output, err := sshClient.commandOverSSH(command)
+	output, err := sshClient.executor.ExecuteCommand(command)
 	check(err, "Error encountered checking service status")
 
 	return Service{
@@ -95,7 +107,7 @@ func (sshClient SshClient) Service(name string) Service {
 }
 
 func (sshClient SshClient) Command(command string) string {
-	output, err := sshClient.commandOverSSH(command)
+	output, err := sshClient.executor.ExecuteCommand(command)
 	check(err, "Error running command")
 	return output
 }
