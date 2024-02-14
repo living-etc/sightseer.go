@@ -52,6 +52,12 @@ func (sshClient SshClient) HasFile(filename string) bool {
 	return true
 }
 
+//func (sshclient SshClient) File(filename string) (File, error) {
+//	command := fmt.Sprintf("stat %v", filename)
+//	output, err := sshclient.commandOverSSH(command)
+//	check(err, "")
+//}
+
 func (sshClient SshClient) Hostname() string {
 	output, err := sshClient.commandOverSSH("hostname -s")
 	check(err, "Error occurred running command over SSH")
