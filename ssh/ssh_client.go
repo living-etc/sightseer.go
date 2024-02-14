@@ -1,8 +1,6 @@
 package ssh
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"log"
 
@@ -18,14 +16,6 @@ func check(err error, message string) {
 type SshClient struct {
 	client   *ssh.Client
 	executor CommandExecutor
-}
-
-type RealCommandExecutor struct {
-	client *ssh.Client
-}
-
-type CommandExecutor interface {
-	ExecuteCommand(command string) (string, error)
 }
 
 func NewSshClient(privateKey []byte, host string) (SshClient, error) {
@@ -74,26 +64,6 @@ func (sshClient SshClient) Hostname() string {
 	output, err := sshClient.executor.ExecuteCommand("hostname -s")
 	check(err, "Error occurred running command over SSH")
 	return output
-}
-
-func (executor RealCommandExecutor) ExecuteCommand(command string) (string, error) {
-	session, err := executor.client.NewSession()
-	check(err, "Unable to open SSH session")
-	defer session.Close()
-
-	cmd := fmt.Sprintf("echo -n $( %v )", command)
-
-	var b bytes.Buffer
-	session.Stdout = &b
-	if err = session.Run(cmd); err != nil {
-		return "", errors.New("Failed to run: " + err.Error())
-	}
-
-	return b.String(), nil
-}
-
-type Service struct {
-	IsActive string
 }
 
 func (sshClient SshClient) Service(name string) Service {
