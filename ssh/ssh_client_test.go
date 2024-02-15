@@ -25,34 +25,37 @@ func (m MockCommandExecutor) ExecuteCommand(command string) (string, error) {
 
 func TestFile(t *testing.T) {
 	tests := []struct {
-		Path  string
-		Owner string
-		Group string
-		Mode  string
+		path       string
+		owner      string
+		group      string
+		mode       string
+		statoutput string
 	}{
 		{
-			Path:  "/usr/local/bin/kube-proxy",
-			Owner: "root",
-			Group: "root",
-			Mode:  "0755",
+			path:       "/usr/local/bin/kube-proxy",
+			owner:      "root",
+			group:      "root",
+			mode:       "0755",
+			statoutput: statOutput,
 		},
 	}
 
-	mockExecutor := MockCommandExecutor{
-		MockResponse: statOutput,
-		MockError:    nil,
-	}
-
-	sshclient := SshClient{
-		client:   nil,
-		executor: &mockExecutor,
-	}
-
 	for _, testcase := range tests {
-		file, _ := sshclient.File(testcase.Path)
-		t.Run(testcase.Path, func(t *testing.T) {
-		})
+		mockExecutor := MockCommandExecutor{
+			MockResponse: testcase.statoutput,
+			MockError:    nil,
+		}
 
-		_ = file
+		sshclient := SshClient{
+			client:   nil,
+			executor: &mockExecutor,
+		}
+
+		file, _ := sshclient.File(testcase.path)
+		t.Run(testcase.path+" owner", func(t *testing.T) {
+			if file.OwnerName != "root" {
+				t.Errorf("want %v, got %v", "root", file.OwnerName)
+			}
+		})
 	}
 }

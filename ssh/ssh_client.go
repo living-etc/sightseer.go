@@ -54,10 +54,11 @@ func (sshClient SshClient) HasFile(filename string) bool {
 
 func (sshclient SshClient) File(filename string) (File, error) {
 	command := fmt.Sprintf("stat %v", filename)
-	_, err := sshclient.executor.ExecuteCommand(command)
+	output, err := sshclient.executor.ExecuteCommand(command)
+	file, _ := fileFromStatOutput(output)
 	check(err, "")
 
-	return File{}, nil
+	return file, nil
 }
 
 func (sshClient SshClient) Hostname() string {
