@@ -67,14 +67,13 @@ func (sshClient SshClient) Hostname() string {
 	return output
 }
 
-func (sshClient SshClient) Service(name string) Service {
-	command := fmt.Sprintf("systemctl is-active %v", name)
+func (sshClient SshClient) Service(name string) (Service, error) {
+	command := fmt.Sprintf("systemctl status %v --no-pager", name)
 	output, err := sshClient.executor.ExecuteCommand(command)
+	service, _ := serviceFromSystemctl(output)
 	check(err, "Error encountered checking service status")
 
-	return Service{
-		IsActive: output,
-	}
+	return service, nil
 }
 
 func (sshClient SshClient) Command(command string) string {
