@@ -26,7 +26,8 @@ type MockCommandExecutor struct {
 }
 
 func (executor MockCommandExecutor) executeCommand(
-	command string,
+	binaru string,
+	args []string,
 ) (string, error) {
 	return executor.MockResponse, executor.MockError
 }

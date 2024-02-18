@@ -1,5 +1,5 @@
 package kubernetes
 
 type CommandExecutor interface {
-	executeCommand(command string) (string, error)
+	executeCommand(binary string, args []string) (string, error)
 }

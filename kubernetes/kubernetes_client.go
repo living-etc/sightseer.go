@@ -78,15 +78,23 @@ func (client KubernetesClient) Version() KubernetesVersionInfo {
 }
 
 func (client KubernetesClient) kubectlCommand(command string) (string, error) {
-	cmd := fmt.Sprintf("kubectl %v --kubeconfig %v --no-headers", command, client.kubeConfigPath)
+	binary := "kubectl"
+	args := []string{
+		"get",
+		"nodes",
+		"--kubeconfig",
+		client.kubeConfigPath,
+		"--no-headers",
+	}
 
-	output, err := client.kubectlCommandExecutor.executeCommand(cmd)
+	output, err := client.kubectlCommandExecutor.executeCommand(binary, args)
 	if err != nil {
 		return "", errors.New(
 			fmt.Sprintf(
-				"Error running command...\nCommand: %v\n%v",
-				cmd,
-				err.Error(),
+				"Error running command...\nCommand: %v %v\n%v",
+				binary,
+				args,
+				output,
 			),
 		)
 	}

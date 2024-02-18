@@ -8,8 +8,10 @@ type RealCommandExecutor struct {
 	kubeConfigPath string
 }
 
-func (executor RealCommandExecutor) executeCommand(command string) (string, error) {
-	output, err := exec.Command(command).Output()
+func (executor RealCommandExecutor) executeCommand(binary string, args []string) (string, error) {
+	cmd := exec.Command(binary, args...)
+
+	output, err := cmd.CombinedOutput()
 
 	return string(output), err
 }
