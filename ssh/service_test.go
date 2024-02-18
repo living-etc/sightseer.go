@@ -31,6 +31,21 @@ func Test_serviceFromSystemctl(t *testing.T) {
 			unitFileWant:     "/etc/systemd/system/kubelet.service",
 			vendorPresetWant: "enabled",
 		},
+		{
+			systemctlOutput: `● kube-controller-manager.service - Kubernetes Controller Manager
+     Loaded: loaded (/etc/systemd/system/kube-controller-manager.service; enabled; vendor preset: enabled)
+     Active: activating (auto-restart) (Result: exit-code) since Sun 2024-02-18 18:20:04 UTC; 1s ago
+       Docs: https://github.com/kubernetes/kubernetes
+    Process: 7165 ExecStart=/usr/local/bin/kube-controller-manager \ (code=exited, status=1/FAILURE)
+   Main PID: 7165 (code=exited, status=1/FAILURE)
+        CPU: 103ms
+`,
+			activeWant:       "activating (auto-restart) (Result: exit-code)",
+			enabledWant:      "enabled",
+			loadedWant:       "loaded",
+			unitFileWant:     "/etc/systemd/system/kube-controller-manager.service",
+			vendorPresetWant: "enabled",
+		},
 	}
 
 	for _, tt := range tests {
