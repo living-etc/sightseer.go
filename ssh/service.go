@@ -14,7 +14,7 @@ type Service struct {
 
 func serviceFromSystemctl(systemctlOutput string) (Service, error) {
 	regexpes := []string{
-		`Active: (?P<Active>.*?) since`,
+		`Active: (?P<Active>.*? \(.+?\))`,
 		`Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); vendor preset: (?P<VendorPreset>.*?)\)`,
 	}
 

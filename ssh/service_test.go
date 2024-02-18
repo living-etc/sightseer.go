@@ -40,7 +40,7 @@ func Test_serviceFromSystemctl(t *testing.T) {
    Main PID: 7165 (code=exited, status=1/FAILURE)
         CPU: 103ms
 `,
-			activeWant:       "activating (auto-restart) (Result: exit-code)",
+			activeWant:       "activating (auto-restart)",
 			enabledWant:      "enabled",
 			loadedWant:       "loaded",
 			unitFileWant:     "/etc/systemd/system/kube-controller-manager.service",

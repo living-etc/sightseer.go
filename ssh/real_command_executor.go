@@ -1,9 +1,7 @@
 package ssh
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
+	"log"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -15,16 +13,17 @@ type RealCommandExecutor struct {
 
 func (executor RealCommandExecutor) ExecuteCommand(command string) (string, error) {
 	session, err := executor.client.NewSession()
-	check(err, "Unable to open SSH session")
+	if err != nil {
+		log.Fatalf("Error creating SSH session: %v", err.Error())
+	}
 	defer session.Close()
 
-	var b bytes.Buffer
-	session.Stdout = &b
-	if err = session.Run(command); err != nil {
-		return "", errors.New(fmt.Sprintf(`Failed to run "%v": %v`, command, err.Error()))
+	output, err := session.CombinedOutput(command)
+	if err != nil {
+		return string(output), err
 	}
 
-	output := strings.TrimSuffix(b.String(), "\n")
+	o := strings.TrimSuffix(string(output), "\n")
 
-	return output, nil
+	return o, nil
 }

@@ -7,20 +7,17 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func check(err error, message string) {
-	if err != nil {
-		log.Fatalf("%v: %v", message, err)
-	}
-}
-
 type SshClient struct {
+	host     string
 	client   *ssh.Client
 	executor CommandExecutor
 }
 
 func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 	signer, err := ssh.ParsePrivateKey(privateKey)
-	check(err, "Unable to parse private key file")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	config := &ssh.ClientConfig{
 		User: "ubuntu",
@@ -33,6 +30,7 @@ func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 	client, err := ssh.Dial("tcp", host+":22", config)
 
 	sshClient := SshClient{
+		host:     host,
 		client:   client,
 		executor: RealCommandExecutor{client: client},
 	}
@@ -40,10 +38,16 @@ func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 	return sshClient, nil
 }
 
+func (sshClient SshClient) fatalError(err error, message string) {
+	if err != nil {
+		log.Fatalf("[%v] %v: %v", sshClient.host, message, err)
+	}
+}
+
 func (sshClient SshClient) HasFile(filename string) bool {
 	command := fmt.Sprintf("test -f %v", filename)
 	_, err := sshClient.executor.ExecuteCommand(command)
-	check(err, "Error occurred running command over SSH")
+	sshClient.fatalError(err, "")
 
 	if err != nil {
 		return false
@@ -55,29 +59,29 @@ func (sshClient SshClient) HasFile(filename string) bool {
 func (sshclient SshClient) File(filename string) (File, error) {
 	command := fmt.Sprintf("stat %v", filename)
 	output, err := sshclient.executor.ExecuteCommand(command)
-	file, _ := fileFromStatOutput(output)
-	check(err, "")
+	file, err := fileFromStatOutput(output)
+	sshclient.fatalError(err, "")
 
 	return file, nil
 }
 
 func (sshClient SshClient) Hostname() string {
 	output, err := sshClient.executor.ExecuteCommand("hostname -s")
-	check(err, "Error occurred running command over SSH")
+	sshClient.fatalError(err, "")
 	return output
 }
 
 func (sshClient SshClient) Service(name string) (Service, error) {
 	command := fmt.Sprintf("systemctl status %v --no-pager", name)
-	output, err := sshClient.executor.ExecuteCommand(command)
-	service, _ := serviceFromSystemctl(output)
-	check(err, "Error encountered checking service status")
+	output, _ := sshClient.executor.ExecuteCommand(command)
+	service, err := serviceFromSystemctl(output)
+	sshClient.fatalError(err, "")
 
 	return service, nil
 }
 
 func (sshClient SshClient) Command(command string) string {
 	output, err := sshClient.executor.ExecuteCommand(command)
-	check(err, "Error running command")
+	sshClient.fatalError(err, "")
 	return output
 }
