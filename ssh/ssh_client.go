@@ -59,8 +59,11 @@ func (sshClient SshClient) HasFile(filename string) bool {
 func (sshclient SshClient) File(filename string) (File, error) {
 	command := fmt.Sprintf("stat %v", filename)
 	output, err := sshclient.executor.ExecuteCommand(command)
+	if err != nil {
+		return File{}, &CommandError{Context: output, Err: err.Error()}
+	}
+
 	file, err := fileFromStatOutput(output)
-	sshclient.fatalError(err, "")
 
 	return file, nil
 }
@@ -73,7 +76,8 @@ func (sshClient SshClient) Hostname() string {
 
 func (sshClient SshClient) Service(name string) (Service, error) {
 	command := fmt.Sprintf("systemctl status %v --no-pager", name)
-	output, _ := sshClient.executor.ExecuteCommand(command)
+	output, err := sshClient.executor.ExecuteCommand(command)
+
 	service, err := serviceFromSystemctl(output)
 	sshClient.fatalError(err, "")
 

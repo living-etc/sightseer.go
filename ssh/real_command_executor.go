@@ -19,11 +19,11 @@ func (executor RealCommandExecutor) ExecuteCommand(command string) (string, erro
 	defer session.Close()
 
 	output, err := session.CombinedOutput(command)
-	if err != nil {
-		return string(output), err
-	}
-
 	o := strings.TrimSuffix(string(output), "\n")
+
+	if err != nil {
+		return o, err
+	}
 
 	return o, nil
 }

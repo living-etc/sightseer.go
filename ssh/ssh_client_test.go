@@ -1,6 +1,8 @@
 package ssh
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -64,6 +66,45 @@ func TestFile(t *testing.T) {
 		t.Run(testcase.path+" owner", func(t *testing.T) {
 			if file.OwnerName != "root" {
 				t.Errorf("want %v, got %v", "root", file.OwnerName)
+			}
+		})
+	}
+}
+
+func TestFile_Error(t *testing.T) {
+	tests := []struct {
+		path       string
+		statoutput string
+		erroutput  string
+	}{
+		{
+			path:       "/opt/cni/bin/bandwidth",
+			statoutput: `stat: cannot statx '/opt/cni/bin/bandwidth': Permission denied`,
+			erroutput:  "Process exited with status 1",
+		},
+	}
+
+	for _, testcase := range tests {
+		mockExecutor := MockCommandExecutor{
+			MockResponse: testcase.statoutput,
+			MockError:    errors.New(testcase.erroutput),
+		}
+
+		sshclient := SshClient{
+			client:   nil,
+			executor: &mockExecutor,
+		}
+
+		_, err := sshclient.File(testcase.path)
+		t.Run(testcase.path+" error", func(t *testing.T) {
+			errWant := fmt.Sprintf(
+				"[Error]: %v [Context]: %v",
+				testcase.erroutput,
+				testcase.statoutput,
+			)
+			errGot := err.Error()
+			if errGot != errWant {
+				t.Errorf("want %v, got %v", errWant, errGot)
 			}
 		})
 	}
