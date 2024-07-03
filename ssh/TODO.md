@@ -1,0 +1,42 @@
+# TODO
+## Resources to implement
+- [] cgroup
+- [] command
+- [] cron
+- [] default_gateway
+- [] docker_container
+- [] docker_image
+- [x] file
+- [] group
+- [] interface
+- [] ip6tables
+- [] ipfilter
+- [] ipnat
+- [] iptables
+- [] kernel_module
+- [] linux_audit_system
+- [] linux kernel parameter
+- [] lxc
+- [] package
+- [] port
+- [] ppa
+- [] process
+- [] routing table
+- [] selinux
+- [] selinux module
+- [] systemd
+    - [x] service
+    - [] timer
+    - [] socket
+    - [] device
+    - [] mount
+    - [] automount
+    - [] swap
+    - [] target
+    - [] path
+    - [] snapshot
+    - [] slice
+    - [] scope
+- [] user
+- [] yumrepo
+- [] zfs
