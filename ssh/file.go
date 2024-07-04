@@ -13,23 +13,18 @@ type File struct {
 }
 
 func fileFromStatOutput(statoutput string) (File, error) {
-	accessPermissionsRegex := `Access: \((?P<mode>\d+)\/.*?\)\s+Uid: \(\s+(?P<uid>\d+)\/\s+(?P<uname>\w+)\)\s+Gid: \(\s+(?P<gid>\d+)\/\s+(?P<gname>\w+)\)`
+	accessPermissionsRegex := `Access: \((?P<Mode>\d+)\/.*?\)\s+Uid: \(\s+(?P<Uid>\d+)\/\s+(?P<Uname>\w+)\)\s+Gid: \(\s+(?P<Gid>\d+)\/\s+(?P<Gname>\w+)\)`
 
 	re := regexp.MustCompile(accessPermissionsRegex)
 	matches := re.FindStringSubmatch(statoutput)
-	result := make(map[string]string)
 
-	for i, name := range re.SubexpNames() {
-		if i > 0 {
-			result[name] = matches[i]
-		}
+	file := File{
+		OwnerName: matches[re.SubexpIndex("Uname")],
+		OwnerId:   matches[re.SubexpIndex("Uid")],
+		GroupName: matches[re.SubexpIndex("Gname")],
+		GroupId:   matches[re.SubexpIndex("Gid")],
+		Mode:      matches[re.SubexpIndex("Mode")],
 	}
 
-	return File{
-		OwnerName: result["uname"],
-		OwnerId:   result["uid"],
-		GroupName: result["gname"],
-		GroupId:   result["gid"],
-		Mode:      result["mode"],
-	}, nil
+	return file, nil
 }
