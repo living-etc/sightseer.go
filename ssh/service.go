@@ -13,29 +13,17 @@ type Service struct {
 }
 
 func serviceFromSystemctl(systemctlOutput string) (Service, error) {
-	regexpes := []string{
-		`Active: (?P<Active>.*? \(.+?\))`,
-		`Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); vendor preset: (?P<VendorPreset>.*?)\)`,
-	}
+	pattern := `Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); vendor preset: (?P<VendorPreset>.*?)\)\s+Active: (?P<Active>.*? \(.+?\))`
 
-	result := make(map[string]string)
-	for _, pattern := range regexpes {
-		re := regexp.MustCompile(pattern)
-		matches := re.FindStringSubmatch(systemctlOutput)
-
-		for i, name := range re.SubexpNames() {
-			if i > 0 {
-				result[name] = matches[i]
-			}
-		}
-	}
+	re := regexp.MustCompile(pattern)
+	matches := re.FindStringSubmatch(systemctlOutput)
 
 	service := Service{
-		Active:       result["Active"],
-		Enabled:      result["Enabled"],
-		Loaded:       result["Loaded"],
-		UnitFile:     result["UnitFile"],
-		VendorPreset: result["VendorPreset"],
+		Active:       matches[re.SubexpIndex("Active")],
+		Enabled:      matches[re.SubexpIndex("Enabled")],
+		Loaded:       matches[re.SubexpIndex("Loaded")],
+		UnitFile:     matches[re.SubexpIndex("UnitFile")],
+		VendorPreset: matches[re.SubexpIndex("VendorPreset")],
 	}
 
 	return service, nil
