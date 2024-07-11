@@ -21,7 +21,7 @@ func (executor RealCommandExecutor) ExecuteCommand(command string) (string, erro
 	o := strings.TrimSuffix(string(output), "\n")
 
 	if err != nil {
-		return o, err
+		return "", &CommandError{Context: o, Err: err.Error()}
 	}
 
 	return o, nil

@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -77,8 +76,11 @@ func TestFile_Error(t *testing.T) {
 
 	for _, testcase := range tests {
 		mockExecutor := MockCommandExecutor{
-			MockResponse: testcase.statoutput,
-			MockError:    errors.New(testcase.erroutput),
+			MockResponse: "",
+			MockError: &CommandError{
+				Context: testcase.statoutput,
+				Err:     testcase.erroutput,
+			},
 		}
 
 		sshclient := SshClient{

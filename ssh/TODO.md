@@ -1,7 +1,7 @@
 # TODO
 ## Resources to implement
 - [] cgroup
-- [] command
+- [x] command
 - [] cron
 - [] default_gateway
 - [] docker_container
