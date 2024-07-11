@@ -42,6 +42,7 @@ func NewSshClient(privateKey []byte, host string, user string) (*SshClient, erro
 
 func (sshclient SshClient) File(filename string) (*File, error) {
 	command := fmt.Sprintf("stat %v", filename)
+
 	output, err := sshclient.executor.ExecuteCommand(command)
 	if err != nil {
 		return nil, err
@@ -53,14 +54,6 @@ func (sshclient SshClient) File(filename string) (*File, error) {
 	}
 
 	return file, nil
-}
-
-func (sshClient SshClient) Hostname() (string, error) {
-	output, err := sshClient.executor.ExecuteCommand("hostname -s")
-	if err != nil {
-		return "", err
-	}
-	return output, nil
 }
 
 func (sshClient SshClient) Service(name string) (*Service, error) {
