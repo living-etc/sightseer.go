@@ -40,36 +40,29 @@ func NewSshClient(privateKey []byte, host string, user string) (*SshClient, erro
 	return sshClient, nil
 }
 
-func (sshclient SshClient) File(filename string) (*File, error) {
-	command := fmt.Sprintf("stat %v", filename)
+type ResourceType interface {
+	File | Service
+}
+
+func Get[T ResourceType](
+	identifier string,
+	sshclient *SshClient,
+	commandString string,
+	parser func(string) (*T, error),
+) (*T, error) {
+	command := fmt.Sprintf(commandString, identifier)
 
 	output, err := sshclient.executor.ExecuteCommand(command)
 	if err != nil {
 		return nil, err
 	}
 
-	file, err := fileFromStatOutput(output)
+	resource, err := parser(output)
 	if err != nil {
 		return nil, err
 	}
 
-	return file, nil
-}
-
-func (sshClient SshClient) Service(name string) (*Service, error) {
-	command := fmt.Sprintf("systemctl status %v --no-pager", name)
-
-	output, err := sshClient.executor.ExecuteCommand(command)
-	if err != nil {
-		return nil, err
-	}
-
-	service, err := serviceFromSystemctl(output)
-	if err != nil {
-		return nil, err
-	}
-
-	return service, nil
+	return resource, nil
 }
 
 func (sshClient SshClient) Command(command string) (string, error) {
