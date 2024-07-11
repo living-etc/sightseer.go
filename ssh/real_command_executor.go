@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"log"
 	"strings"
 
 	"golang.org/x/crypto/ssh"
@@ -14,7 +13,7 @@ type RealCommandExecutor struct {
 func (executor RealCommandExecutor) ExecuteCommand(command string) (string, error) {
 	session, err := executor.client.NewSession()
 	if err != nil {
-		log.Fatalf("Error creating SSH session: %v", err.Error())
+		return "", err
 	}
 	defer session.Close()
 

@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"fmt"
-	"log"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -41,54 +40,48 @@ func NewSshClient(privateKey []byte, host string, user string) (*SshClient, erro
 	return sshClient, nil
 }
 
-func (sshClient SshClient) fatalError(err error, message string) {
-	if err != nil {
-		log.Fatalf("[%v] %v: %v", sshClient.host, message, err)
-	}
-}
-
-func (sshClient SshClient) HasFile(filename string) bool {
-	command := fmt.Sprintf("test -f %v", filename)
-	_, err := sshClient.executor.ExecuteCommand(command)
-	sshClient.fatalError(err, "")
-
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
-func (sshclient SshClient) File(filename string) (File, error) {
+func (sshclient SshClient) File(filename string) (*File, error) {
 	command := fmt.Sprintf("stat %v", filename)
 	output, err := sshclient.executor.ExecuteCommand(command)
 	if err != nil {
-		return File{}, &CommandError{Context: output, Err: err.Error()}
+		return nil, &CommandError{Context: output, Err: err.Error()}
 	}
 
 	file, err := fileFromStatOutput(output)
+	if err != nil {
+		return nil, err
+	}
 
 	return file, nil
 }
 
-func (sshClient SshClient) Hostname() string {
+func (sshClient SshClient) Hostname() (string, error) {
 	output, err := sshClient.executor.ExecuteCommand("hostname -s")
-	sshClient.fatalError(err, "")
-	return output
+	if err != nil {
+		return "", err
+	}
+	return output, nil
 }
 
-func (sshClient SshClient) Service(name string) (Service, error) {
+func (sshClient SshClient) Service(name string) (*Service, error) {
 	command := fmt.Sprintf("systemctl status %v --no-pager", name)
 	output, err := sshClient.executor.ExecuteCommand(command)
+	if err != nil {
+		return nil, &CommandError{Context: output, Err: err.Error()}
+	}
 
 	service, err := serviceFromSystemctl(output)
-	sshClient.fatalError(err, "")
+	if err != nil {
+		return nil, err
+	}
 
 	return service, nil
 }
 
-func (sshClient SshClient) Command(command string) string {
+func (sshClient SshClient) Command(command string) (string, error) {
 	output, err := sshClient.executor.ExecuteCommand(command)
-	sshClient.fatalError(err, "")
-	return output
+	if err != nil {
+		return "", err
+	}
+	return output, nil
 }

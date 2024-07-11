@@ -12,13 +12,13 @@ type Service struct {
 	Preset   string
 }
 
-func serviceFromSystemctl(systemctlOutput string) (Service, error) {
+func serviceFromSystemctl(systemctlOutput string) (*Service, error) {
 	pattern := `Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); .*: (?P<Preset>.*?)\)\s+Active: (?P<Active>.*? \(.+?\))`
 
 	re := regexp.MustCompile(pattern)
 	matches := re.FindStringSubmatch(systemctlOutput)
 
-	service := Service{
+	service := &Service{
 		Active:   matches[re.SubexpIndex("Active")],
 		Enabled:  matches[re.SubexpIndex("Enabled")],
 		Loaded:   matches[re.SubexpIndex("Loaded")],
