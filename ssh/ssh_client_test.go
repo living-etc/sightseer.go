@@ -3,6 +3,8 @@ package ssh
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -15,17 +17,6 @@ Access: 2024-02-13 18:28:13.260372630 +0000
 Modify: 2024-02-13 18:28:13.196371385 +0000
 Change: 2024-02-13 18:28:13.256372552 +0000
  Birth: 2024-02-13 18:28:11.628340885 +0000
-`
-	systemctlOutput = `● kubelet.service - Kubernetes Kubelet
-     Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; vendor preset: enabled)
-     Active: active (running) since Thu 2024-02-15 22:48:43 UTC; 8min ago
-       Docs: https://github.com/kubernetes/kubernetes
-   Main PID: 532 (kubelet)
-      Tasks: 11 (limit: 2263)
-     Memory: 119.2M
-        CPU: 4.143s
-     CGroup: /system.slice/kubelet.service
-             └─532 /usr/local/bin/kubelet --config=/var/lib/kubelet/kubelet-config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock --image-pull-progress-dea…
 `
 )
 
@@ -117,24 +108,25 @@ func TestService(t *testing.T) {
 		serviceName     string
 	}{
 		{
-			systemctlOutput: systemctlOutput,
-			activeWant:      "active (running)",
-			serviceName:     "kubelet",
+			activeWant:  "active (running)",
+			serviceName: "ssh",
 		},
 	}
 
+	privateKey, _ := os.ReadFile(".vagrant/machines/default/vmware_desktop/private_key")
+	vmIP := "172.16.44.180"
+
+	sshclient, err := NewSshClient(privateKey, vmIP, "vagrant")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, testcase := range tests {
-		mockExecutor := MockCommandExecutor{
-			MockResponse: testcase.systemctlOutput,
-			MockError:    nil,
+		service, err := sshclient.Service("ssh")
+		if err != nil {
+			log.Fatal(err)
 		}
 
-		sshclient := SshClient{
-			client:   nil,
-			executor: &mockExecutor,
-		}
-
-		service, _ := sshclient.Service("kubelet")
 		t.Run(testcase.serviceName+": active", func(t *testing.T) {
 			if service.Active != testcase.activeWant {
 				t.Errorf("want %v, got %v", testcase.activeWant, service.Active)

@@ -13,14 +13,14 @@ type SshClient struct {
 	executor CommandExecutor
 }
 
-func NewSshClient(privateKey []byte, host string) (SshClient, error) {
+func NewSshClient(privateKey []byte, host string, user string) (*SshClient, error) {
 	signer, err := ssh.ParsePrivateKey(privateKey)
 	if err != nil {
-		log.Fatal(err.Error())
+		return nil, err
 	}
 
 	config := &ssh.ClientConfig{
-		User: "ubuntu",
+		User: user,
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(signer),
 		},
@@ -28,8 +28,11 @@ func NewSshClient(privateKey []byte, host string) (SshClient, error) {
 	}
 
 	client, err := ssh.Dial("tcp", host+":22", config)
+	if err != nil {
+		return nil, err
+	}
 
-	sshClient := SshClient{
+	sshClient := &SshClient{
 		host:     host,
 		client:   client,
 		executor: RealCommandExecutor{client: client},
