@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"log"
 	"testing"
 )
 
@@ -73,7 +74,10 @@ TriggeredBy: ● ssh.socket
 	}
 
 	for _, tt := range tests {
-		service, _ := serviceFromSystemctl(tt.systemctlOutput)
+		service, err := ParseOutput[Service, ServiceQuery](tt.systemctlOutput)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		t.Run(tt.name, func(t *testing.T) {
 			if service.Active != tt.activeWant {

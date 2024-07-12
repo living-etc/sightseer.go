@@ -22,19 +22,19 @@ func TestFile(t *testing.T) {
 	tests := []struct {
 		path      string
 		owner     string
-		err       bool
+		error     bool
 		erroutput string
 	}{
 		{
 			path:      "/home/vagrant/.bashrc",
 			owner:     "vagrant",
-			err:       false,
+			error:     false,
 			erroutput: "",
 		},
 		{
 			path:      "/home/vagrant/.bashrc.doesnt.exist",
 			owner:     "vagrant",
-			err:       true,
+			error:     true,
 			erroutput: `[Error]: Process exited with status 1 [Context]: stat: cannot statx '/home/vagrant/.bashrc.doesnt.exist': No such file or directory`,
 		},
 	}
@@ -42,17 +42,13 @@ func TestFile(t *testing.T) {
 	sshclient := VagrantSetup()
 
 	for _, testcase := range tests {
-		file, err := Get(
-			testcase.path,
-			sshclient,
-			"stat %v",
-			fileFromStatOutput,
-		)
+		file, err := Get(testcase.path, sshclient, FileQuery{})
 
 		t.Run(testcase.path+" owner", func(t *testing.T) {
-			if err != nil {
+			if testcase.error {
 				errWant := testcase.erroutput
 				errGot := err.Error()
+
 				if errGot != errWant {
 					t.Errorf("want %v, got %v", errWant, errGot)
 				}
@@ -80,12 +76,7 @@ func TestService(t *testing.T) {
 	sshclient := VagrantSetup()
 
 	for _, testcase := range tests {
-		service, err := Get(
-			"ssh",
-			sshclient,
-			"systemctl status %v --no-pager",
-			serviceFromSystemctl,
-		)
+		service, err := Get("ssh", sshclient, ServiceQuery{})
 		if err != nil {
 			log.Fatal(err)
 		}
