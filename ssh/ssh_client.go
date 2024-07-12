@@ -49,13 +49,21 @@ func NewSshClient(privateKey []byte, host string, user string) (*SshClient, erro
 	return sshClient, nil
 }
 
+func (sshclient *SshClient) Service(name string) (*Service, error) {
+	return get(name, sshclient, ServiceQuery{})
+}
+
+func (sshclient *SshClient) File(name string) (*File, error) {
+	return get(name, sshclient, FileQuery{})
+}
+
 type ResourceQuery[T ResourceType] interface {
 	Regex() string
 	Command() string
 	SetValues(*T, map[string]string)
 }
 
-func Get[T ResourceType, Q ResourceQuery[T]](
+func get[T ResourceType, Q ResourceQuery[T]](
 	identifier string,
 	sshclient *SshClient,
 	query Q,
@@ -67,7 +75,7 @@ func Get[T ResourceType, Q ResourceQuery[T]](
 		return nil, err
 	}
 
-	resource, err := ParseOutput[T, Q](output)
+	resource, err := parseOutput[T, Q](output)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +83,7 @@ func Get[T ResourceType, Q ResourceQuery[T]](
 	return resource, nil
 }
 
-func ParseOutput[T ResourceType, Q ResourceQuery[T]](output string) (*T, error) {
+func parseOutput[T ResourceType, Q ResourceQuery[T]](output string) (*T, error) {
 	var q Q
 	regex := q.Regex()
 

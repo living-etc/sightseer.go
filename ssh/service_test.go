@@ -74,7 +74,7 @@ TriggeredBy: ● ssh.socket
 	}
 
 	for _, tt := range tests {
-		service, err := ParseOutput[Service, ServiceQuery](tt.systemctlOutput)
+		service, err := parseOutput[Service, ServiceQuery](tt.systemctlOutput)
 		if err != nil {
 			log.Fatal(err)
 		}

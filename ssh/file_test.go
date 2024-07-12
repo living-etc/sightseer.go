@@ -50,7 +50,7 @@ Change: 2024-02-15 14:05:30.314397696 +0000
 
 	t.Run("test file from stat", func(t *testing.T) {
 		for _, tt := range tests {
-			file, err := ParseOutput[File, FileQuery](tt.statoutput)
+			file, err := parseOutput[File, FileQuery](tt.statoutput)
 			if err != nil {
 				log.Fatal(err)
 			}

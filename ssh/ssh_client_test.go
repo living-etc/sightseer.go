@@ -42,7 +42,7 @@ func TestFile(t *testing.T) {
 	sshclient := VagrantSetup()
 
 	for _, testcase := range tests {
-		file, err := Get(testcase.path, sshclient, FileQuery{})
+		file, err := sshclient.File(testcase.path)
 
 		t.Run(testcase.path+" owner", func(t *testing.T) {
 			if testcase.error {
@@ -76,7 +76,7 @@ func TestService(t *testing.T) {
 	sshclient := VagrantSetup()
 
 	for _, testcase := range tests {
-		service, err := Get("ssh", sshclient, ServiceQuery{})
+		service, err := sshclient.Service("ssh")
 		if err != nil {
 			log.Fatal(err)
 		}
