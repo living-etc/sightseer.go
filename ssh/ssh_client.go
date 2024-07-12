@@ -57,12 +57,6 @@ func (sshclient *SshClient) File(name string) (*File, error) {
 	return get(name, sshclient, FileQuery{})
 }
 
-type ResourceQuery[T ResourceType] interface {
-	Regex() string
-	Command() string
-	SetValues(*T, map[string]string)
-}
-
 func get[T ResourceType, Q ResourceQuery[T]](
 	identifier string,
 	sshclient *SshClient,
