@@ -37,6 +37,6 @@
     - [] snapshot
     - [] slice
     - [] scope
-- [] user
+- [x] user
 - [] yumrepo
 - [] zfs

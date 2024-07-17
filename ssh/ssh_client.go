@@ -57,6 +57,10 @@ func (sshclient *SshClient) File(name string) (*File, error) {
 	return get(name, sshclient, FileQuery{})
 }
 
+func (sshclient *SshClient) User(name string) (*User, error) {
+	return get(name, sshclient, UserQuery{})
+}
+
 func get[T ResourceType, Q ResourceQuery[T]](
 	identifier string,
 	sshclient *SshClient,

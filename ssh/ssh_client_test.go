@@ -88,3 +88,40 @@ func TestService(t *testing.T) {
 		})
 	}
 }
+
+func TestUser(t *testing.T) {
+	tests := []struct {
+		testName          string
+		passwdOutput      string
+		usernameWant      string
+		uidWant           int
+		gidWant           int
+		homeDirectoryWant string
+		shellWant         string
+	}{
+		{
+			testName:          "User vagrant exists",
+			passwdOutput:      `vagrant:x:1000:1000:vagrant:/home/vagrant:/bin/bash`,
+			usernameWant:      "vagrant",
+			uidWant:           1000,
+			gidWant:           1000,
+			homeDirectoryWant: "/home/vagrant",
+			shellWant:         "/bin/bash",
+		},
+	}
+
+	sshclient := VagrantSetup()
+
+	for _, testcase := range tests {
+		user, err := sshclient.User("vagrant")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		t.Run(testcase.testName, func(t *testing.T) {
+			if user.Username != testcase.usernameWant {
+				t.Fatalf("want %v, got %v", testcase.usernameWant, user.Username)
+			}
+		})
+	}
+}
