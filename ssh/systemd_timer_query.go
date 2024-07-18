@@ -16,7 +16,9 @@ func (query SystemdTimerQuery) Regex() string {
 	return `^.+ - (?P<Description>.*)\s+Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); .*: (?P<Preset>.*?)\)\s+Active: (?P<Active>.*? \(.+?\))[\s\S]+Trigger: \w+ (?P<NextTriggerDate>.*) (?P<NextTriggerTime>.*) (?P<NextTriggerTimeZone>\w+);[\s\S]+Triggers: ● (?P<Triggers>.*)`
 }
 
-func (query SystemdTimerQuery) SetValues(systemdTimer *SystemdTimer, values map[string]string) {
+func (query SystemdTimerQuery) SetValues(values map[string]string) (*SystemdTimer, error) {
+	systemdTimer := &SystemdTimer{}
+
 	systemdTimer.Description = values["Description"]
 
 	loadedString := values["Loaded"]
@@ -45,14 +47,32 @@ func (query SystemdTimerQuery) SetValues(systemdTimer *SystemdTimer, values map[
 	systemdTimer.Active = values["Active"]
 
 	dateParts := strings.Split(values["NextTriggerDate"], "-")
-	year, _ := strconv.Atoi(dateParts[0])
-	month, _ := strconv.Atoi(dateParts[1])
-	day, _ := strconv.Atoi(dateParts[2])
+	year, err := strconv.Atoi(dateParts[0])
+	if err != nil {
+		return nil, err
+	}
+	month, err := strconv.Atoi(dateParts[1])
+	if err != nil {
+		return nil, err
+	}
+	day, err := strconv.Atoi(dateParts[2])
+	if err != nil {
+		return nil, err
+	}
 
 	timeParts := strings.Split(values["NextTriggerTime"], ":")
-	hours, _ := strconv.Atoi(timeParts[0])
-	minutes, _ := strconv.Atoi(timeParts[1])
-	seconds, _ := strconv.Atoi(timeParts[2])
+	hours, err := strconv.Atoi(timeParts[0])
+	if err != nil {
+		return nil, err
+	}
+	minutes, err := strconv.Atoi(timeParts[1])
+	if err != nil {
+		return nil, err
+	}
+	seconds, err := strconv.Atoi(timeParts[2])
+	if err != nil {
+		return nil, err
+	}
 
 	systemdTimer.NextTrigger = time.Date(
 		year,
@@ -66,4 +86,6 @@ func (query SystemdTimerQuery) SetValues(systemdTimer *SystemdTimer, values map[
 	)
 
 	systemdTimer.Triggers = values["Triggers"]
+
+	return systemdTimer, nil
 }

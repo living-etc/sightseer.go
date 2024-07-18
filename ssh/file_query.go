@@ -10,10 +10,12 @@ func (query FileQuery) Regex() string {
 	return `Access: \((?P<Mode>\d+)\/.*?\)\s+Uid: \(\s+(?P<OwnerId>\d+)\/\s+(?P<OwnerName>\w+)\)\s+Gid: \(\s+(?P<GroupId>\d+)\/\s+(?P<GroupName>\w+)\)`
 }
 
-func (query FileQuery) SetValues(file *File, values map[string]string) {
-	file.OwnerName = values["OwnerName"]
-	file.OwnerId = values["OwnerId"]
-	file.GroupName = values["GroupName"]
-	file.GroupId = values["GroupId"]
-	file.Mode = values["Mode"]
+func (query FileQuery) SetValues(values map[string]string) (*File, error) {
+	return &File{
+		OwnerName: values["OwnerName"],
+		OwnerId:   values["OwnerId"],
+		GroupName: values["GroupName"],
+		GroupId:   values["GroupId"],
+		Mode:      values["Mode"],
+	}, nil
 }

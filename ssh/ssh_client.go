@@ -102,8 +102,10 @@ func parseOutput[T ResourceType, Q ResourceQuery[T]](output string) (*T, error) 
 		}
 	}
 
-	result := new(T)
-	q.SetValues(result, values)
+	result, err := q.SetValues(values)
+	if err != nil {
+		return nil, err
+	}
 
 	return result, nil
 }

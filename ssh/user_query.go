@@ -12,10 +12,25 @@ func (query UserQuery) Regex() string {
 	return `(?P<Username>\w*?):(?P<Password>.*?):(?P<Uid>[0-9]*?):(?P<Gid>[0-9]*?):(?P<GECOS>.*?):(?P<HomeDirectory>.*?):(?P<Shell>.*?$)`
 }
 
-func (query UserQuery) SetValues(user *User, values map[string]string) {
+func (query UserQuery) SetValues(values map[string]string) (*User, error) {
+	user := &User{}
+
 	user.Username = values["Username"]
-	user.Uid, _ = strconv.Atoi(values["Uid"])
-	user.Gid, _ = strconv.Atoi(values["Gid"])
+
+	uid, err := strconv.Atoi(values["Uid"])
+	if err != nil {
+		return nil, err
+	}
+	user.Uid = uid
+
+	gid, err := strconv.Atoi(values["Gid"])
+	if err != nil {
+		return nil, err
+	}
+	user.Gid = gid
+
 	user.HomeDirectory = values["HomeDirectory"]
 	user.Shell = values["Shell"]
+
+	return user, nil
 }
