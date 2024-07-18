@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 )
 
 func VagrantSetup() *SshClient {
@@ -121,6 +122,55 @@ func TestUser(t *testing.T) {
 		t.Run(testcase.testName, func(t *testing.T) {
 			if user.Username != testcase.usernameWant {
 				t.Fatalf("want %v, got %v", testcase.usernameWant, user.Username)
+			}
+		})
+	}
+}
+
+func TestSystemdTimer(t *testing.T) {
+	tests := []struct {
+		name            string
+		systemctlOutput string
+		descriptionWant string
+		loadedWant      bool
+		unitFileWant    string
+		enabledWant     bool
+		presetWant      bool
+		activeWant      string
+		nextTriggerWant time.Time
+		triggersWant    string
+	}{
+		{
+			name: "Timer",
+			systemctlOutput: `● logrotate.timer - Daily rotation of log files
+     Loaded: loaded (/usr/lib/systemd/system/logrotate.timer; enabled; preset: enabled)
+     Active: active (waiting) since Wed 2024-07-17 17:50:38 UTC; 24h ago
+    Trigger: Fri 2024-07-19 01:02:03 UTC; 5h 28min left
+   Triggers: ● logrotate.service
+       Docs: man:logrotate(8)
+             man:logrotate.conf(5)`,
+			descriptionWant: "Daily rotation of log files",
+			loadedWant:      true,
+			unitFileWant:    "/usr/lib/systemd/system/logrotate.timer",
+			enabledWant:     true,
+			presetWant:      true,
+			activeWant:      "active (waiting)",
+			nextTriggerWant: time.Date(2024, time.July, 19, 01, 02, 03, 0, time.UTC),
+			triggersWant:    "logrotate.service",
+		},
+	}
+
+	sshclient := VagrantSetup()
+
+	for _, testcase := range tests {
+		timer, err := sshclient.SystemdTimer("logrotate.timer")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		t.Run(testcase.name, func(t *testing.T) {
+			if timer.Description != testcase.descriptionWant {
+				t.Fatalf("want %v, got %v", testcase.descriptionWant, timer.Description)
 			}
 		})
 	}
