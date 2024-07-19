@@ -1,6 +1,8 @@
 package ssh
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type UserQuery struct{}
 
@@ -19,13 +21,13 @@ func (query UserQuery) SetValues(values map[string]string) (*User, error) {
 
 	uid, err := strconv.Atoi(values["Uid"])
 	if err != nil {
-		return nil, err
+		uid = -1
 	}
 	user.Uid = uid
 
 	gid, err := strconv.Atoi(values["Gid"])
 	if err != nil {
-		return nil, err
+		gid = -1
 	}
 	user.Gid = gid
 
