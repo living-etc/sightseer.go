@@ -47,7 +47,7 @@ func Test_userFromPasswd(t *testing.T) {
 	for _, tt := range tests {
 		user, err := parseOutput[User, UserQuery](tt.passwdOutput)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error in %v: %v", tt.testName, err)
 		}
 
 		t.Run(tt.testName, func(t *testing.T) {

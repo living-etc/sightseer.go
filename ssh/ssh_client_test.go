@@ -13,7 +13,7 @@ func VagrantSetup() *SshClient {
 
 	sshclient, err := NewSshClient(privateKey, vmIP, "vagrant")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Error creating ssh client: %v", err)
 	}
 
 	return sshclient
@@ -64,11 +64,12 @@ func TestFile(t *testing.T) {
 
 func TestService(t *testing.T) {
 	tests := []struct {
-		systemctlOutput string
-		activeWant      string
-		serviceName     string
+		name        string
+		activeWant  string
+		serviceName string
 	}{
 		{
+			name:        "SSH service is running",
 			activeWant:  "active (running)",
 			serviceName: "ssh",
 		},
@@ -79,7 +80,7 @@ func TestService(t *testing.T) {
 	for _, testcase := range tests {
 		service, err := sshclient.Service("ssh")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error in %v: %v", testcase.name, err)
 		}
 
 		t.Run(testcase.serviceName+": active", func(t *testing.T) {
@@ -116,12 +117,12 @@ func TestUser(t *testing.T) {
 	for _, testcase := range tests {
 		user, err := sshclient.User("vagrant")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error in %v: %v", testcase.testName, err)
 		}
 
 		t.Run(testcase.testName, func(t *testing.T) {
 			if user.Username != testcase.usernameWant {
-				t.Fatalf("want %v, got %v", testcase.usernameWant, user.Username)
+				t.Fatalf("want %v, got %v", testcase.usernameWant, err)
 			}
 		})
 	}
@@ -165,7 +166,7 @@ func TestSystemdTimer(t *testing.T) {
 	for _, testcase := range tests {
 		timer, err := sshclient.SystemdTimer("logrotate.timer")
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error in %v: %v", testcase.name, err)
 		}
 
 		t.Run(testcase.name, func(t *testing.T) {

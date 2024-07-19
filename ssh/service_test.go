@@ -76,7 +76,7 @@ TriggeredBy: ● ssh.socket
 	for _, tt := range tests {
 		service, err := parseOutput[Service, ServiceQuery](tt.systemctlOutput)
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("Error in %v: %v", tt.name, err)
 		}
 
 		t.Run(tt.name, func(t *testing.T) {

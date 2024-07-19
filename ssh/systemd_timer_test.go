@@ -43,7 +43,7 @@ func Test_systemdTimerFromSystemctl(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			timer, err := parseOutput[SystemdTimer, SystemdTimerQuery](tt.systemctlOutput)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("Error in %v: %v", tt.name, err)
 			}
 
 			if tt.descriptionWant != timer.Description {

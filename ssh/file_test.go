@@ -7,6 +7,7 @@ import (
 
 func Test_fileFromStatOutput(t *testing.T) {
 	tests := []struct {
+		name          string
 		statoutput    string
 		ownerNameWant string
 		ownerIdWant   string
@@ -15,6 +16,7 @@ func Test_fileFromStatOutput(t *testing.T) {
 		modeWant      string
 	}{
 		{
+			name: "Kube proxy binary",
 			statoutput: `  File: /usr/local/bin/kube-proxy
   Size: 43130880  	Blocks: 84240      IO Block: 4096   regular file
 Device: 801h/2049d	Inode: 258242      Links: 1
@@ -31,6 +33,7 @@ Change: 2024-02-13 18:28:13.256372552 +0000
 			modeWant:      "0755",
 		},
 		{
+			name: "admin.kubeconfig",
 			statoutput: `  File: admin.kubeconfig
   Size: 6261      	Blocks: 16         IO Block: 4096   regular file
 Device: 801h/2049d	Inode: 258140      Links: 1
@@ -52,7 +55,7 @@ Change: 2024-02-15 14:05:30.314397696 +0000
 		for _, tt := range tests {
 			file, err := parseOutput[File, FileQuery](tt.statoutput)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatalf("Error in %v: %v", tt.name, err)
 			}
 
 			ownerWant := tt.ownerNameWant
