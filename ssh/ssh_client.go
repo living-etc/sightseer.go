@@ -65,6 +65,10 @@ func (sshclient *SshClient) SystemdTimer(name string) (*SystemdTimer, error) {
 	return get(name, sshclient, SystemdTimerQuery{})
 }
 
+func (sshclient *SshClient) LinuxKernelParameter(name string) (*LinuxKernelParameter, error) {
+	return get(name, sshclient, LinuxKernelParameterQuery{})
+}
+
 func get[T ResourceType, Q ResourceQuery[T]](
 	identifier string,
 	sshclient *SshClient,

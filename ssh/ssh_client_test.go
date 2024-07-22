@@ -176,3 +176,32 @@ func TestSystemdTimer(t *testing.T) {
 		})
 	}
 }
+
+func TestLinuxKernelParameter(t *testing.T) {
+	tests := []struct {
+		name          string
+		parameterName string
+		valueWant     string
+	}{
+		{
+			name:          "Get a parameter",
+			parameterName: "vm.page_lock_unfairness",
+			valueWant:     "5",
+		},
+	}
+
+	sshClient := VagrantSetup()
+
+	for _, testcase := range tests {
+		linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.parameterName)
+		if err != nil {
+			log.Fatalf("Error in %v: %v", testcase.name, err)
+		}
+
+		t.Run(testcase.name, func(t *testing.T) {
+			if linuxKernelParameter.Value != testcase.valueWant {
+				t.Errorf("want %v, got %v", testcase.valueWant, linuxKernelParameter.Value)
+			}
+		})
+	}
+}

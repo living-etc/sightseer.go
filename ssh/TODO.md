@@ -1,4 +1,8 @@
 # TODO
+## Functionality to implement
+- Add charmbracelet log library and make it easy to enable debug mode
+- Rewrite the parsing logic to not use regex, instead having each query type
+  implement its own parsing logic using Go functions instead of regex
 ## Resources to implement
 - [] cgroup
 - [x] command
@@ -15,7 +19,7 @@
 - [] iptables
 - [] kernel_module
 - [] linux_audit_system
-- [] linux kernel parameter
+- [x] linux kernel parameter
 - [] lxc
 - [] package
 - [] port
