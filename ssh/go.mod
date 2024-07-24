@@ -1,4 +1,4 @@
-module github.com/living-etc/go-server-test/ssh
+module github.com/living-etc/sightseer.go/ssh
 
 go 1.21.1
 

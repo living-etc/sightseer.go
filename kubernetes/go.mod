@@ -1,3 +1,3 @@
-module github.com/living-etc/go-server-test/kubernetes
+module github.com/living-etc/sightseer.go/kubernetes
 
 go 1.21.1

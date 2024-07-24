@@ -1,4 +1,4 @@
-# Infrastructure testing with Go
+# Infrastructure inspection in go
 
 This is a work in progress and is not recommended for production use.
 
@@ -16,7 +16,7 @@ package main
 import (
 	"testing"
 
-	"github.com/living-etc/go-server-test/azure"
+	"github.com/living-etc/sightser.go/azure"
 )
 
 const (
@@ -87,7 +87,7 @@ package main
 import (
 	"testing"
 
-	"github.com/living-etc/go-server-test/azure"
+	"github.com/living-etc/sightseer.go/azure"
 )
 
 const (

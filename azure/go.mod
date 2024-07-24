@@ -1,4 +1,4 @@
-module github.com/living-etc/go-server-test/azure
+module github.com/living-etc/sightseer.go/azure
 
 go 1.21.1
 
