@@ -1,4 +1,6 @@
-# Infrastructure inspection in go
+# sightseer.go
+
+Look around your infrastructure using Go.
 
 This is a work in progress and is not recommended for production use.
 

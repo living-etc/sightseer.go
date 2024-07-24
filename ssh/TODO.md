@@ -3,6 +3,10 @@
 - Add charmbracelet log library and make it easy to enable debug mode
 - Rewrite the parsing logic to not use regex, instead having each query type
   implement its own parsing logic using Go functions instead of regex
+## Research
+- Research the scheme for systemctl output. The difference between "preset" and
+  "vendor preset" tripped me up - ssh service only had preset, but kubelet had
+  "vendor preset".
 ## Resources to implement
 - [] cgroup
 - [x] command
