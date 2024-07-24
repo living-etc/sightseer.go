@@ -1,22 +1,47 @@
 package ssh
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
 	"time"
 )
 
-func VagrantSetup() *SshClient {
-	privateKey, _ := os.ReadFile(".vagrant/machines/default/vmware_desktop/private_key")
-	vmIP := "172.16.44.180"
-
-	sshclient, err := NewSshClient(privateKey, vmIP, "vagrant")
-	if err != nil {
-		log.Fatalf("Error creating ssh client: %v", err)
+func VagrantSetup() []*SshClient {
+	testMachines := []struct {
+		ip   string
+		name string
+	}{
+		{
+			name: "ubuntu2404",
+			ip:   "172.16.44.180",
+		},
+		//{
+		//	name: "fedora40",
+		//	ip:   "172.16.44.201",
+		//},
 	}
 
-	return sshclient
+	var sshClients []*SshClient
+
+	for _, machine := range testMachines {
+		privateKey, err := os.ReadFile(
+			fmt.Sprintf(".vagrant/machines/%v/vmware_desktop/private_key", machine.name),
+		)
+		if err != nil {
+			log.Fatalf("Error reading private key for %v", machine.name)
+		}
+
+		sshclient, err := NewSshClient(privateKey, machine.ip, "vagrant")
+		if err != nil {
+			log.Fatalf("Error creating ssh client: %v", err)
+		}
+
+		sshClients = append(sshClients, sshclient)
+	}
+
+	return sshClients
 }
 
 func TestFile(t *testing.T) {
@@ -40,25 +65,27 @@ func TestFile(t *testing.T) {
 		},
 	}
 
-	sshclient := VagrantSetup()
+	sshclients := VagrantSetup()
 
 	for _, testcase := range tests {
-		file, err := sshclient.File(testcase.path)
+		for _, sshclient := range sshclients {
+			file, err := sshclient.File(testcase.path)
 
-		t.Run(testcase.path+" owner", func(t *testing.T) {
-			if testcase.error {
-				errWant := testcase.erroutput
-				errGot := err.Error()
+			t.Run(testcase.path+" owner", func(t *testing.T) {
+				if testcase.error {
+					errWant := testcase.erroutput
+					errGot := err.Error()
 
-				if errGot != errWant {
-					t.Errorf("want %v, got %v", errWant, errGot)
+					if errGot != errWant {
+						t.Errorf("want %v, got %v", errWant, errGot)
+					}
+				} else {
+					if file.OwnerName != "vagrant" {
+						t.Errorf("want %v, got %v", "vagrant", file.OwnerName)
+					}
 				}
-			} else {
-				if file.OwnerName != "vagrant" {
-					t.Errorf("want %v, got %v", "vagrant", file.OwnerName)
-				}
-			}
-		})
+			})
+		}
 	}
 }
 
@@ -69,25 +96,27 @@ func TestService(t *testing.T) {
 		serviceName string
 	}{
 		{
-			name:        "SSH service is running",
+			name:        "Test service hello-world service is running",
 			activeWant:  "active (running)",
-			serviceName: "ssh",
+			serviceName: "hello-world.service",
 		},
 	}
 
-	sshclient := VagrantSetup()
+	sshclients := VagrantSetup()
 
 	for _, testcase := range tests {
-		service, err := sshclient.Service("ssh")
-		if err != nil {
-			log.Fatalf("Error in %v: %v", testcase.name, err)
-		}
-
-		t.Run(testcase.serviceName+": active", func(t *testing.T) {
-			if service.Active != testcase.activeWant {
-				t.Errorf("want %v, got %v", testcase.activeWant, service.Active)
+		for _, sshclient := range sshclients {
+			service, err := sshclient.Service(testcase.serviceName)
+			if err != nil {
+				log.Fatalf("Error in %v: %v", testcase.name, err)
 			}
-		})
+
+			t.Run(testcase.serviceName+": active", func(t *testing.T) {
+				if service.Active != testcase.activeWant {
+					t.Errorf("want %v, got %v", testcase.activeWant, service.Active)
+				}
+			})
+		}
 	}
 }
 
@@ -112,19 +141,21 @@ func TestUser(t *testing.T) {
 		},
 	}
 
-	sshclient := VagrantSetup()
+	sshclients := VagrantSetup()
 
 	for _, testcase := range tests {
-		user, err := sshclient.User("vagrant")
-		if err != nil {
-			log.Fatalf("Error in %v: %v", testcase.testName, err)
-		}
-
-		t.Run(testcase.testName, func(t *testing.T) {
-			if user.Username != testcase.usernameWant {
-				t.Fatalf("want %v, got %v", testcase.usernameWant, err)
+		for _, sshclient := range sshclients {
+			user, err := sshclient.User("vagrant")
+			if err != nil {
+				log.Fatalf("Error in %v: %v", testcase.testName, err)
 			}
-		})
+
+			t.Run(testcase.testName, func(t *testing.T) {
+				if user.Username != testcase.usernameWant {
+					t.Fatalf("want %v, got %v", testcase.usernameWant, err)
+				}
+			})
+		}
 	}
 }
 
@@ -161,19 +192,21 @@ func TestSystemdTimer(t *testing.T) {
 		},
 	}
 
-	sshclient := VagrantSetup()
+	sshclients := VagrantSetup()
 
 	for _, testcase := range tests {
-		timer, err := sshclient.SystemdTimer("logrotate.timer")
-		if err != nil {
-			log.Fatalf("Error in %v: %v", testcase.name, err)
-		}
-
-		t.Run(testcase.name, func(t *testing.T) {
-			if timer.Description != testcase.descriptionWant {
-				t.Fatalf("want %v, got %v", testcase.descriptionWant, timer.Description)
+		for _, sshclient := range sshclients {
+			timer, err := sshclient.SystemdTimer("logrotate.timer")
+			if err != nil {
+				log.Fatalf("Error in %v: %v", testcase.name, err)
 			}
-		})
+
+			t.Run(testcase.name, func(t *testing.T) {
+				if timer.Description != testcase.descriptionWant {
+					t.Fatalf("want %v, got %v", testcase.descriptionWant, timer.Description)
+				}
+			})
+		}
 	}
 }
 
@@ -190,18 +223,20 @@ func TestLinuxKernelParameter(t *testing.T) {
 		},
 	}
 
-	sshClient := VagrantSetup()
+	sshClients := VagrantSetup()
 
 	for _, testcase := range tests {
-		linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.parameterName)
-		if err != nil {
-			log.Fatalf("Error in %v: %v", testcase.name, err)
-		}
-
-		t.Run(testcase.name, func(t *testing.T) {
-			if linuxKernelParameter.Value != testcase.valueWant {
-				t.Errorf("want %v, got %v", testcase.valueWant, linuxKernelParameter.Value)
+		for _, sshclient := range sshClients {
+			linuxKernelParameter, err := sshclient.LinuxKernelParameter(testcase.parameterName)
+			if err != nil {
+				log.Fatalf("Error in %v: %v", testcase.name, err)
 			}
-		})
+
+			t.Run(testcase.name, func(t *testing.T) {
+				if linuxKernelParameter.Value != testcase.valueWant {
+					t.Errorf("want %v, got %v", testcase.valueWant, linuxKernelParameter.Value)
+				}
+			})
+		}
 	}
 }

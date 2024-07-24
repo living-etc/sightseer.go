@@ -1,0 +1,14 @@
+[Unit]
+Description=Simple service for testing against
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+ExecStart=/bin/bash -c 'while true; do sleep 1; done'
+
+[Install]
+WantedBy=multi-user.target
