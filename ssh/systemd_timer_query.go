@@ -1,7 +1,9 @@
 package ssh
 
 import (
-	"strconv"
+	"bufio"
+	"errors"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -9,83 +11,38 @@ import (
 type SystemdTimerQuery struct{}
 
 func (query SystemdTimerQuery) Command() string {
-	return "systemctl status %v"
+	return "systemctl show %v"
 }
 
-func (query SystemdTimerQuery) Regex() string {
-	return `^.+ - (?P<Description>.*)\s+Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); .*: (?P<Preset>.*?)\)\s+Active: (?P<Active>.*? \(.+?\))[\s\S]+Trigger: \w+ (?P<NextTriggerDate>.*) (?P<NextTriggerTime>.*) (?P<NextTriggerTimeZone>\w+);[\s\S]+Triggers: ● (?P<Triggers>.*)`
-}
-
-func (query SystemdTimerQuery) SetValues(values map[string]string) (*SystemdTimer, error) {
+func (query SystemdTimerQuery) ParseOutput(output string) (*SystemdTimer, error) {
 	systemdTimer := &SystemdTimer{}
 
+	values := make(map[string]string)
+
+	scanner := bufio.NewScanner(strings.NewReader(output))
+	for scanner.Scan() {
+		attribute := strings.SplitN(scanner.Text(), "=", 2)
+		values[attribute[0]] = attribute[1]
+	}
+
 	systemdTimer.Description = values["Description"]
-
-	loadedString := values["Loaded"]
-	if loadedString == "loaded" {
-		systemdTimer.Loaded = true
-	} else {
-		systemdTimer.Loaded = false
-	}
-
-	systemdTimer.UnitFile = values["UnitFile"]
-
-	enabledString := values["Enabled"]
-	if enabledString == "enabled" {
-		systemdTimer.Enabled = true
-	} else {
-		systemdTimer.Enabled = false
-	}
-
-	presetString := values["Preset"]
-	if presetString == "enabled" {
-		systemdTimer.Preset = true
-	} else {
-		systemdTimer.Preset = false
-	}
-
-	systemdTimer.Active = values["Active"]
-
-	dateParts := strings.Split(values["NextTriggerDate"], "-")
-	year, err := strconv.Atoi(dateParts[0])
-	if err != nil {
-		return nil, err
-	}
-	month, err := strconv.Atoi(dateParts[1])
-	if err != nil {
-		return nil, err
-	}
-	day, err := strconv.Atoi(dateParts[2])
-	if err != nil {
-		return nil, err
-	}
-
-	timeParts := strings.Split(values["NextTriggerTime"], ":")
-	hours, err := strconv.Atoi(timeParts[0])
-	if err != nil {
-		return nil, err
-	}
-	minutes, err := strconv.Atoi(timeParts[1])
-	if err != nil {
-		return nil, err
-	}
-	seconds, err := strconv.Atoi(timeParts[2])
-	if err != nil {
-		return nil, err
-	}
-
-	systemdTimer.NextTrigger = time.Date(
-		year,
-		time.Month(month),
-		day,
-		hours,
-		minutes,
-		seconds,
-		0,
-		time.UTC,
-	)
-
+	systemdTimer.LoadState = values["LoadState"]
+	systemdTimer.UnitFileState = values["UnitFileState"]
+	systemdTimer.UnitFilePreset = values["UnitFilePreset"]
+	systemdTimer.ActiveState = values["ActiveState"]
 	systemdTimer.Triggers = values["Triggers"]
+
+	re := regexp.MustCompile(`next_elapse=(\w+ \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \w+)`)
+	match := re.FindStringSubmatch(values["TimersCalendar"])
+	if len(match) == 0 {
+		return nil, errors.New("No timestamp found in the input string")
+	}
+
+	nextTriggerTime, err := time.Parse("Mon 2006-01-02 15:04:05 MST", match[1])
+	if err != nil {
+		return nil, err
+	}
+	systemdTimer.NextTrigger = nextTriggerTime
 
 	return systemdTimer, nil
 }

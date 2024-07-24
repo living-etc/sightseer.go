@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"strconv"
+	"strings"
 )
 
 type UserQuery struct{}
@@ -10,29 +11,29 @@ func (query UserQuery) Command() string {
 	return "grep -e ^%v: /etc/passwd"
 }
 
-func (query UserQuery) Regex() string {
-	return `(?P<Username>\w*?):(?P<Password>.*?):(?P<Uid>[0-9]*?):(?P<Gid>[0-9]*?):(?P<GECOS>.*?):(?P<HomeDirectory>.*?):(?P<Shell>.*?$)`
-}
-
-func (query UserQuery) SetValues(values map[string]string) (*User, error) {
+func (query UserQuery) ParseOutput(output string) (*User, error) {
 	user := &User{}
 
-	user.Username = values["Username"]
+	parts := strings.Split(output, ":")
 
-	uid, err := strconv.Atoi(values["Uid"])
+	user.Username = parts[0]
+
+	uid, err := strconv.Atoi(parts[2])
 	if err != nil {
-		uid = -1
+		user.Uid = -1
+	} else {
+		user.Uid = uid
 	}
-	user.Uid = uid
 
-	gid, err := strconv.Atoi(values["Gid"])
+	gid, err := strconv.Atoi(parts[3])
 	if err != nil {
-		gid = -1
+		user.Gid = -1
+	} else {
+		user.Gid = gid
 	}
-	user.Gid = gid
 
-	user.HomeDirectory = values["HomeDirectory"]
-	user.Shell = values["Shell"]
+	user.HomeDirectory = parts[5]
+	user.Shell = parts[6]
 
 	return user, nil
 }

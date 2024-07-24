@@ -34,9 +34,7 @@
 - [] selinux module
 - [] systemd
     - [x] service
-        - [] Add timezone support
     - [x] timer
-        - [] Add timezone support
     - [] socket
     - [] device
     - [] mount

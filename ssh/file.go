@@ -1,9 +1,15 @@
 package ssh
 
 type File struct {
-	OwnerName string
-	OwnerId   string
-	GroupName string
-	GroupId   string
-	Mode      string
+	Type          string
+	OwnerName     string
+	OwnerID       int
+	GroupName     string
+	GroupID       int
+	SizeBytes     int
+	Name          string
+	MountPoint    string
+	InodeNumber   int
+	NoOfHardLinks int
+	Mode          string
 }

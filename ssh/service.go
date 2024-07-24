@@ -1,9 +1,9 @@
 package ssh
 
 type Service struct {
-	Active   string
-	Enabled  string
-	Loaded   string
-	UnitFile string
-	Preset   string
+	Description    string
+	LoadState      string
+	UnitFileState  string
+	UnitFilePreset string
+	ActiveState    string
 }

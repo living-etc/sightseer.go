@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -19,7 +21,7 @@ func VagrantSetup() []*SshClient {
 		},
 		//{
 		//	name: "fedora40",
-		//	ip:   "172.16.44.201",
+		//	ip:   "172.16.44.181",
 		//},
 	}
 
@@ -46,22 +48,31 @@ func VagrantSetup() []*SshClient {
 
 func TestFile(t *testing.T) {
 	tests := []struct {
-		path      string
-		owner     string
-		error     bool
-		erroutput string
+		testName string
+		path     string
+		fileWant *File
 	}{
 		{
-			path:      "/home/vagrant/.bashrc",
-			owner:     "vagrant",
-			error:     false,
-			erroutput: "",
+			testName: "File exists",
+			path:     "/home/vagrant/.bashrc",
+			fileWant: &File{
+				Type:          "regular file",
+				OwnerID:       1001,
+				OwnerName:     "vagrant",
+				GroupID:       1001,
+				GroupName:     "vagrant",
+				SizeBytes:     3771,
+				Name:          ".bashrc",
+				MountPoint:    "/",
+				InodeNumber:   1835013,
+				NoOfHardLinks: 1,
+				Mode:          "644",
+			},
 		},
 		{
-			path:      "/home/vagrant/.bashrc.doesnt.exist",
-			owner:     "vagrant",
-			error:     true,
-			erroutput: `[Error]: Process exited with status 1 [Context]: stat: cannot statx '/home/vagrant/.bashrc.doesnt.exist': No such file or directory`,
+			testName: "File doesn't exist",
+			path:     "/home/vagrant/.bashrc.doesnt.exist",
+			fileWant: nil,
 		},
 	}
 
@@ -71,17 +82,23 @@ func TestFile(t *testing.T) {
 		for _, sshclient := range sshclients {
 			file, err := sshclient.File(testcase.path)
 
-			t.Run(testcase.path+" owner", func(t *testing.T) {
-				if testcase.error {
-					errWant := testcase.erroutput
-					errGot := err.Error()
+			t.Run(testcase.testName, func(t *testing.T) {
+				if err != nil {
+					containsErrorString := strings.Contains(
+						err.Error(),
+						"No such file or directory",
+					)
 
-					if errGot != errWant {
-						t.Errorf("want %v, got %v", errWant, errGot)
+					if !containsErrorString {
+						t.Errorf(
+							"Error failed:\nwanted err to contain:\t%v\ngot:\t\t\t%v",
+							"No such file or directory",
+							err.Error(),
+						)
 					}
 				} else {
-					if file.OwnerName != "vagrant" {
-						t.Errorf("want %v, got %v", "vagrant", file.OwnerName)
+					if reflect.DeepEqual(file, testcase.fileWant) {
+						t.Errorf("File failed:\nwant\t%v\ngot\t%v", testcase.fileWant, file)
 					}
 				}
 			})
@@ -92,12 +109,18 @@ func TestFile(t *testing.T) {
 func TestService(t *testing.T) {
 	tests := []struct {
 		name        string
-		activeWant  string
+		serviceWant *Service
 		serviceName string
 	}{
 		{
-			name:        "Test service hello-world service is running",
-			activeWant:  "active (running)",
+			name: "hello-world service is running",
+			serviceWant: &Service{
+				Description:    "Simple service for testing against",
+				LoadState:      "loaded",
+				UnitFileState:  "enabled",
+				UnitFilePreset: "enabled",
+				ActiveState:    "active",
+			},
 			serviceName: "hello-world.service",
 		},
 	}
@@ -111,9 +134,9 @@ func TestService(t *testing.T) {
 				log.Fatalf("Error in %v: %v", testcase.name, err)
 			}
 
-			t.Run(testcase.serviceName+": active", func(t *testing.T) {
-				if service.Active != testcase.activeWant {
-					t.Errorf("want %v, got %v", testcase.activeWant, service.Active)
+			t.Run(testcase.serviceName, func(t *testing.T) {
+				if !reflect.DeepEqual(service, testcase.serviceWant) {
+					t.Errorf("Service failed:\nwant:\t%v\ngot\t\t%v", testcase.serviceWant, service)
 				}
 			})
 		}
@@ -122,22 +145,20 @@ func TestService(t *testing.T) {
 
 func TestUser(t *testing.T) {
 	tests := []struct {
-		testName          string
-		passwdOutput      string
-		usernameWant      string
-		uidWant           int
-		gidWant           int
-		homeDirectoryWant string
-		shellWant         string
+		testName string
+		username string
+		userWant *User
 	}{
 		{
-			testName:          "User vagrant exists",
-			passwdOutput:      `vagrant:x:1000:1000:vagrant:/home/vagrant:/bin/bash`,
-			usernameWant:      "vagrant",
-			uidWant:           1000,
-			gidWant:           1000,
-			homeDirectoryWant: "/home/vagrant",
-			shellWant:         "/bin/bash",
+			testName: "User vagrant exists",
+			username: "vagrant",
+			userWant: &User{
+				Username:      "vagrant",
+				Uid:           1000,
+				Gid:           1000,
+				HomeDirectory: "/home/vagrant",
+				Shell:         "/bin/bash",
+			},
 		},
 	}
 
@@ -151,8 +172,8 @@ func TestUser(t *testing.T) {
 			}
 
 			t.Run(testcase.testName, func(t *testing.T) {
-				if user.Username != testcase.usernameWant {
-					t.Fatalf("want %v, got %v", testcase.usernameWant, err)
+				if !reflect.DeepEqual(user, testcase.userWant) {
+					t.Fatalf("User failed:\nwant:\t%v\ngot:\t%v", testcase.userWant, user)
 				}
 			})
 		}
@@ -161,34 +182,20 @@ func TestUser(t *testing.T) {
 
 func TestSystemdTimer(t *testing.T) {
 	tests := []struct {
-		name            string
-		systemctlOutput string
-		descriptionWant string
-		loadedWant      bool
-		unitFileWant    string
-		enabledWant     bool
-		presetWant      bool
-		activeWant      string
-		nextTriggerWant time.Time
-		triggersWant    string
+		name      string
+		timerWant *SystemdTimer
 	}{
 		{
 			name: "Timer",
-			systemctlOutput: `● logrotate.timer - Daily rotation of log files
-     Loaded: loaded (/usr/lib/systemd/system/logrotate.timer; enabled; preset: enabled)
-     Active: active (waiting) since Wed 2024-07-17 17:50:38 UTC; 24h ago
-    Trigger: Fri 2024-07-19 01:02:03 UTC; 5h 28min left
-   Triggers: ● logrotate.service
-       Docs: man:logrotate(8)
-             man:logrotate.conf(5)`,
-			descriptionWant: "Daily rotation of log files",
-			loadedWant:      true,
-			unitFileWant:    "/usr/lib/systemd/system/logrotate.timer",
-			enabledWant:     true,
-			presetWant:      true,
-			activeWant:      "active (waiting)",
-			nextTriggerWant: time.Date(2024, time.July, 19, 01, 02, 03, 0, time.UTC),
-			triggersWant:    "logrotate.service",
+			timerWant: &SystemdTimer{
+				Description:    "Daily rotation of log files",
+				LoadState:      "loaded",
+				UnitFileState:  "enabled",
+				UnitFilePreset: "enabled",
+				ActiveState:    "active",
+				NextTrigger:    time.Date(2024, time.July, 27, 00, 00, 00, 0, time.UTC),
+				Triggers:       "logrotate.service",
+			},
 		},
 	}
 
@@ -202,8 +209,8 @@ func TestSystemdTimer(t *testing.T) {
 			}
 
 			t.Run(testcase.name, func(t *testing.T) {
-				if timer.Description != testcase.descriptionWant {
-					t.Fatalf("want %v, got %v", testcase.descriptionWant, timer.Description)
+				if !reflect.DeepEqual(timer, testcase.timerWant) {
+					t.Fatalf("SystemdTimer failed:\nwant:\t%v\ngot:\t%v", testcase.timerWant, timer)
 				}
 			})
 		}
@@ -214,12 +221,14 @@ func TestLinuxKernelParameter(t *testing.T) {
 	tests := []struct {
 		name          string
 		parameterName string
-		valueWant     string
+		parameterWant *LinuxKernelParameter
 	}{
 		{
 			name:          "Get a parameter",
 			parameterName: "vm.page_lock_unfairness",
-			valueWant:     "5",
+			parameterWant: &LinuxKernelParameter{
+				Value: "5",
+			},
 		},
 	}
 
@@ -233,8 +242,12 @@ func TestLinuxKernelParameter(t *testing.T) {
 			}
 
 			t.Run(testcase.name, func(t *testing.T) {
-				if linuxKernelParameter.Value != testcase.valueWant {
-					t.Errorf("want %v, got %v", testcase.valueWant, linuxKernelParameter.Value)
+				if !reflect.DeepEqual(linuxKernelParameter, testcase.parameterWant) {
+					t.Errorf(
+						"LinuxKernelParameter failed:\nwant:\t%v\ngot:\t%v",
+						testcase.parameterWant,
+						linuxKernelParameter,
+					)
 				}
 			})
 		}

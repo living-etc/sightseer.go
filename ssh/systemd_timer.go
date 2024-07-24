@@ -5,12 +5,11 @@ import (
 )
 
 type SystemdTimer struct {
-	Description string
-	Loaded      bool
-	UnitFile    string
-	Enabled     bool
-	Preset      bool
-	Active      string
-	NextTrigger time.Time
-	Triggers    string
+	Description    string
+	LoadState      string
+	UnitFileState  string
+	UnitFilePreset string
+	ActiveState    string
+	NextTrigger    time.Time
+	Triggers       string
 }

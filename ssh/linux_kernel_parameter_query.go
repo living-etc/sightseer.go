@@ -1,21 +1,23 @@
 package ssh
 
+import (
+	"strings"
+)
+
 type LinuxKernelParameterQuery struct{}
 
 func (query LinuxKernelParameterQuery) Command() string {
 	return "sudo sysctl -a | grep --color=none %v"
 }
 
-func (query LinuxKernelParameterQuery) Regex() string {
-	return `= (?P<Value>.*)`
-}
-
-func (query LinuxKernelParameterQuery) SetValues(
-	values map[string]string,
+func (query LinuxKernelParameterQuery) ParseOutput(
+	output string,
 ) (*LinuxKernelParameter, error) {
 	linuxKernalParameter := &LinuxKernelParameter{}
 
-	linuxKernalParameter.Value = values["Value"]
+	parts := strings.Split(output, " = ")
+
+	linuxKernalParameter.Value = parts[1]
 
 	return linuxKernalParameter, nil
 }

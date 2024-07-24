@@ -1,9 +1,7 @@
 package ssh
 
 import (
-	"errors"
 	"fmt"
-	"regexp"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -81,37 +79,13 @@ func get[T ResourceType, Q ResourceQuery[T]](
 		return nil, err
 	}
 
-	resource, err := parseOutput[T, Q](output)
+	var q Q
+	resource, err := q.ParseOutput(output)
 	if err != nil {
 		return nil, err
 	}
 
 	return resource, nil
-}
-
-func parseOutput[T ResourceType, Q ResourceQuery[T]](output string) (*T, error) {
-	var q Q
-	regex := q.Regex()
-
-	re := regexp.MustCompile(regex)
-	matches := re.FindStringSubmatch(output)
-	if len(matches) == 0 {
-		return nil, errors.New("failed to parse output")
-	}
-
-	values := make(map[string]string)
-	for i, name := range re.SubexpNames() {
-		if i != 0 && name != "" {
-			values[name] = matches[i]
-		}
-	}
-
-	result, err := q.SetValues(values)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }
 
 func (sshClient SshClient) Command(command string) (string, error) {

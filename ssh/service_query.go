@@ -1,21 +1,32 @@
 package ssh
 
+import (
+	"bufio"
+	"strings"
+)
+
 type ServiceQuery struct{}
 
 func (query ServiceQuery) Command() string {
-	return "systemctl status %v --no-pager"
+	return "systemctl show %v --no-pager"
 }
 
-func (query ServiceQuery) Regex() string {
-	return `Loaded: (?P<Loaded>\w+) \((?P<UnitFile>.*?); (?P<Enabled>\w+); .*: (?P<Preset>.*?)\)\s+Active: (?P<Active>.*? \(.+?\))`
-}
+func (query ServiceQuery) ParseOutput(output string) (*Service, error) {
+	service := &Service{}
 
-func (query ServiceQuery) SetValues(values map[string]string) (*Service, error) {
-	return &Service{
-		Active:   values["Active"],
-		Enabled:  values["Enabled"],
-		Loaded:   values["Loaded"],
-		UnitFile: values["UnitFile"],
-		Preset:   values["Preset"],
-	}, nil
+	values := make(map[string]string)
+
+	scanner := bufio.NewScanner(strings.NewReader(output))
+	for scanner.Scan() {
+		attribute := strings.SplitN(scanner.Text(), "=", 2)
+		values[attribute[0]] = attribute[1]
+	}
+
+	service.Description = values["Description"]
+	service.LoadState = values["LoadState"]
+	service.UnitFileState = values["UnitFileState"]
+	service.UnitFilePreset = values["UnitFilePreset"]
+	service.ActiveState = values["ActiveState"]
+
+	return service, nil
 }
