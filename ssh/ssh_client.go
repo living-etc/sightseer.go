@@ -14,7 +14,7 @@ type SshClient struct {
 	executor CommandExecutor
 }
 
-func NewSshClient(privateKey []byte, host string, user string) (*SshClient, error) {
+func NewSshClient(privateKey []byte, host string, port string, user string) (*SshClient, error) {
 	signer, err := ssh.ParsePrivateKey(privateKey)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func NewSshClient(privateKey []byte, host string, user string) (*SshClient, erro
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	client, err := ssh.Dial("tcp", host+":22", config)
+	client, err := ssh.Dial("tcp", host+":"+port, config)
 	if err != nil {
 		return nil, err
 	}

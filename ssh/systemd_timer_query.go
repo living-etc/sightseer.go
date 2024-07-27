@@ -25,6 +25,15 @@ func (query SystemdTimerQuery) ParseOutput(output string) (*SystemdTimer, error)
 		values[attribute[0]] = attribute[1]
 	}
 
+	if values["LoadState"] == "not-found" {
+		return nil, &SystemdLoadError{
+			UnitName:  values["Id"],
+			LoadState: values["LoadState"],
+			LoadError: values["LoadError"],
+		}
+	}
+
+	systemdTimer.Id = values["Id"]
 	systemdTimer.Description = values["Description"]
 	systemdTimer.LoadState = values["LoadState"]
 	systemdTimer.UnitFileState = values["UnitFileState"]

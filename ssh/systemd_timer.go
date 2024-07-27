@@ -5,6 +5,7 @@ import (
 )
 
 type SystemdTimer struct {
+	Id             string
 	Description    string
 	LoadState      string
 	UnitFileState  string
