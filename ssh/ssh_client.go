@@ -6,12 +6,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type (
-	Resource     interface{}
-	ResourceType interface {
-		Resource
-	}
-)
+type ResourceType interface{}
 
 type SshClient struct {
 	host     string
