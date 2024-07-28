@@ -61,7 +61,7 @@ func TestFile(t *testing.T) {
 		sshClient := VagrantSetup(testPlatform)
 
 		for _, testcase := range tests {
-			file, err := sshClient.File(testcase.path)
+			file, err := sshClient.File(testcase.resourceIdentifier)
 
 			t.Run(testcase.testName, func(t *testing.T) {
 				if err != nil {
@@ -78,8 +78,8 @@ func TestFile(t *testing.T) {
 						)
 					}
 				} else {
-					if reflect.DeepEqual(file, testcase.fileWant) {
-						t.Errorf("File failed:\nwant\t%v\ngot\t%v", testcase.fileWant, file)
+					if reflect.DeepEqual(file, testcase.resourceWant) {
+						t.Errorf("File failed:\nwant\t%v\ngot\t%v", testcase.resourceWant, file)
 					}
 				}
 			})
@@ -94,14 +94,18 @@ func TestService(t *testing.T) {
 		sshClient := VagrantSetup(testPlatform)
 
 		for _, testcase := range tests {
-			service, err := sshClient.Service(testcase.serviceName)
+			service, err := sshClient.Service(testcase.resourceIdentifier)
 			if err != nil {
-				log.Fatalf("Error in %v: %v", testcase.name, err)
+				log.Fatalf("Error in %v: %v", testcase.resourceIdentifier, err)
 			}
 
-			t.Run(testcase.serviceName, func(t *testing.T) {
-				if !reflect.DeepEqual(service, testcase.serviceWant) {
-					t.Errorf("Service failed:\nwant:\t%v\ngot\t\t%v", testcase.serviceWant, service)
+			t.Run(testcase.testName, func(t *testing.T) {
+				if !reflect.DeepEqual(service, testcase.resourceWant) {
+					t.Errorf(
+						"Service failed:\nwant:\t%v\ngot\t\t%v",
+						testcase.resourceWant,
+						service,
+					)
 				}
 			})
 		}
@@ -115,14 +119,14 @@ func TestUser(t *testing.T) {
 		sshClient := VagrantSetup(testPlatform)
 
 		for _, testcase := range tests {
-			user, err := sshClient.User(testcase.username)
+			user, err := sshClient.User(testcase.resourceIdentifier)
 			if err != nil {
 				t.Fatalf("Error in %v: %v", testcase.testName, err)
 			}
 
 			t.Run(testcase.testName, func(t *testing.T) {
-				if !reflect.DeepEqual(user, testcase.userWant) {
-					t.Fatalf("User failed:\nwant:\t%v\ngot:\t%v", testcase.userWant, user)
+				if !reflect.DeepEqual(user, testcase.resourceWant) {
+					t.Fatalf("User failed:\nwant:\t%v\ngot:\t%v", testcase.resourceWant, user)
 				}
 			})
 		}
@@ -136,7 +140,7 @@ func TestSystemdTimer(t *testing.T) {
 		tests := TestCases.SystemdTimer(testPlatform)
 
 		for _, testcase := range tests {
-			timer, err := sshClient.SystemdTimer(testcase.timerName)
+			timer, err := sshClient.SystemdTimer(testcase.resourceIdentifier)
 			if err != nil {
 				if err.Error() != testcase.errWant.Error() {
 					t.Fatalf(
@@ -147,8 +151,8 @@ func TestSystemdTimer(t *testing.T) {
 				}
 			} else {
 				t.Run(testcase.testName, func(t *testing.T) {
-					if !reflect.DeepEqual(timer, testcase.timerWant) {
-						t.Fatalf("SystemdTimer failed:\nwant:\t%v\ngot:\t%v", testcase.timerWant, timer)
+					if !reflect.DeepEqual(timer, testcase.resourceWant) {
+						t.Fatalf("SystemdTimer failed:\nwant:\t%v\ngot:\t%v", testcase.resourceWant, timer)
 					}
 				})
 			}
@@ -163,16 +167,16 @@ func TestLinuxKernelParameter(t *testing.T) {
 		tests := TestCases.LinuxKernelParameter(testPlatform)
 
 		for _, testcase := range tests {
-			linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.parameterName)
+			linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.resourceIdentifier)
 			if err != nil {
-				log.Fatalf("Error in %v: %v", testcase.name, err)
+				log.Fatalf("Error in %v: %v", testcase.resourceIdentifier, err)
 			}
 
-			t.Run(testcase.name, func(t *testing.T) {
-				if !reflect.DeepEqual(linuxKernelParameter, testcase.parameterWant) {
+			t.Run(testcase.testName, func(t *testing.T) {
+				if !reflect.DeepEqual(linuxKernelParameter, testcase.resourceWant) {
 					t.Errorf(
 						"LinuxKernelParameter failed:\nwant:\t%v\ngot:\t%v",
-						testcase.parameterWant,
+						testcase.resourceWant,
 						linuxKernelParameter,
 					)
 				}

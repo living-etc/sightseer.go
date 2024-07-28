@@ -6,20 +6,21 @@ type testCases struct{}
 
 var TestCases testCases
 
-type FileTestCase struct {
-	testName string
-	path     string
-	fileWant *File
+type TestCase struct {
+	testName           string
+	resourceIdentifier string
+	resourceWant       interface{}
+	errWant            error
 }
 
-func (testCases) File(platform string) []FileTestCase {
+func (testCases) File(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404", "fedora40":
-		return []FileTestCase{
+		return []TestCase{
 			{
-				testName: "File exists",
-				path:     "/home/vagrant/.bashrc",
-				fileWant: &File{
+				testName:           "File exists",
+				resourceIdentifier: "/home/vagrant/.bashrc",
+				resourceWant: &File{
 					Type:          "regular file",
 					OwnerID:       1001,
 					OwnerName:     "vagrant",
@@ -32,101 +33,87 @@ func (testCases) File(platform string) []FileTestCase {
 					NoOfHardLinks: 1,
 					Mode:          "644",
 				},
+				errWant: nil,
 			},
 			{
-				testName: "File doesn't exist",
-				path:     "/home/vagrant/.bashrc.doesnt.exist",
-				fileWant: nil,
+				testName:           "File doesn't exist",
+				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
+				resourceWant:       nil,
+				errWant:            nil,
 			},
 		}
 	default:
-		return []FileTestCase{}
+		return []TestCase{}
 	}
 }
 
-type ServiceTestCase struct {
-	name        string
-	serviceWant *Service
-	serviceName string
-}
-
-func (testCases) Service(platform string) []ServiceTestCase {
+func (testCases) Service(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404":
-		return []ServiceTestCase{
+		return []TestCase{
 			{
-				name: "hello-world service is running",
-				serviceWant: &Service{
+				testName:           "hello-world service is running",
+				resourceIdentifier: "hello-world.service",
+				resourceWant: &Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
 					UnitFilePreset: "enabled",
 					ActiveState:    "active",
 				},
-				serviceName: "hello-world.service",
+				errWant: nil,
 			},
 		}
 	case "fedora40":
-		return []ServiceTestCase{
+		return []TestCase{
 			{
-				name: "hello-world service is running",
-				serviceWant: &Service{
+				testName:           "hello-world service is running",
+				resourceIdentifier: "hello-world.service",
+				resourceWant: &Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
 					UnitFilePreset: "disabled",
 					ActiveState:    "active",
 				},
-				serviceName: "hello-world.service",
+				errWant: nil,
 			},
 		}
 	default:
-		return []ServiceTestCase{}
+		return []TestCase{}
 	}
 }
 
-type UserTestCase struct {
-	testName string
-	username string
-	userWant *User
-}
-
-func (testCases) User(platform string) []UserTestCase {
+func (testCases) User(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404", "fedora40":
-		return []UserTestCase{
+		return []TestCase{
 			{
-				testName: "User vagrant exists",
-				username: "vagrant",
-				userWant: &User{
+				testName:           "User vagrant exists",
+				resourceIdentifier: "vagrant",
+				resourceWant: &User{
 					Username:      "vagrant",
 					Uid:           1000,
 					Gid:           1000,
 					HomeDirectory: "/home/vagrant",
 					Shell:         "/bin/bash",
 				},
+				errWant: nil,
 			},
 		}
 	default:
-		return []UserTestCase{}
+		return []TestCase{}
 	}
 }
 
-type SystemdTimerTestCase struct {
-	testName  string
-	timerName string
-	timerWant *SystemdTimer
-	errWant   error
-}
-
-func (testCases) SystemdTimer(platform string) []SystemdTimerTestCase {
+func (testCases) SystemdTimer(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404":
-		return []SystemdTimerTestCase{
+		return []TestCase{
 			{
-				testName:  "Logrotate timer exists",
-				timerName: "logrotate.timer",
-				timerWant: &SystemdTimer{
+				testName:           "Logrotate timer exists",
+				resourceIdentifier: "logrotate.timer",
+				resourceWant: &SystemdTimer{
 					Id:             "logrotate.timer",
 					Description:    "Daily rotation of log files",
 					LoadState:      "loaded",
@@ -149,11 +136,11 @@ func (testCases) SystemdTimer(platform string) []SystemdTimerTestCase {
 			},
 		}
 	case "fedora40":
-		return []SystemdTimerTestCase{
+		return []TestCase{
 			{
-				testName:  "Logrotate timer does not exist",
-				timerName: "logrotate.timer",
-				timerWant: nil,
+				testName:           "Logrotate timer does not exist",
+				resourceIdentifier: "logrotate.timer",
+				resourceWant:       nil,
 				errWant: &SystemdLoadError{
 					UnitName:  "logrotate.timer",
 					LoadState: "not-found",
@@ -162,30 +149,24 @@ func (testCases) SystemdTimer(platform string) []SystemdTimerTestCase {
 			},
 		}
 	default:
-		return []SystemdTimerTestCase{}
+		return []TestCase{}
 	}
 }
 
-type LinuxKernelParameterTestCase struct {
-	name          string
-	parameterName string
-	parameterWant *LinuxKernelParameter
-	errWant       error
-}
-
-func (testCases) LinuxKernelParameter(platform string) []LinuxKernelParameterTestCase {
+func (testCases) LinuxKernelParameter(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404", "fedora40":
-		return []LinuxKernelParameterTestCase{
+		return []TestCase{
 			{
-				name:          "Get a parameter",
-				parameterName: "vm.page_lock_unfairness",
-				parameterWant: &LinuxKernelParameter{
+				testName:           "Get a parameter",
+				resourceIdentifier: "vm.page_lock_unfairness",
+				resourceWant: &LinuxKernelParameter{
 					Value: "5",
 				},
+				errWant: nil,
 			},
 		}
 	default:
-		return []LinuxKernelParameterTestCase{}
+		return []TestCase{}
 	}
 }
