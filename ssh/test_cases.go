@@ -30,21 +30,27 @@ func (testCases) Get(resourceType string, platform string) []TestCase {
 	}
 }
 
+type FileError struct {
+	ErrorReason string
+}
+
+func (err FileError) Error() string { return err.ErrorReason }
+
 func (testCases) File(platform string) []TestCase {
 	switch platform {
-	case "ubuntu2404", "fedora40":
+	case "ubuntu2404":
 		return []TestCase{
 			{
 				testName:           "File exists",
 				resourceIdentifier: "/home/vagrant/.bashrc",
 				resourceWant: &File{
 					Type:          "regular file",
-					OwnerID:       1001,
+					OwnerID:       1000,
 					OwnerName:     "vagrant",
-					GroupID:       1001,
+					GroupID:       1000,
 					GroupName:     "vagrant",
 					SizeBytes:     3771,
-					Name:          ".bashrc",
+					Name:          "/home/vagrant/.bashrc",
 					MountPoint:    "/",
 					InodeNumber:   1835013,
 					NoOfHardLinks: 1,
@@ -56,7 +62,38 @@ func (testCases) File(platform string) []TestCase {
 				testName:           "File doesn't exist",
 				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
 				resourceWant:       nil,
-				errWant:            nil,
+				errWant: &FileError{
+					ErrorReason: "No such file or directory",
+				},
+			},
+		}
+	case "fedora40":
+		return []TestCase{
+			{
+				testName:           "File exists",
+				resourceIdentifier: "/home/vagrant/.bashrc",
+				resourceWant: &File{
+					Type:          "regular file",
+					OwnerID:       1000,
+					OwnerName:     "vagrant",
+					GroupID:       1000,
+					GroupName:     "vagrant",
+					SizeBytes:     522,
+					Name:          "/home/vagrant/.bashrc",
+					MountPoint:    "/",
+					InodeNumber:   17337356,
+					NoOfHardLinks: 1,
+					Mode:          "644",
+				},
+				errWant: nil,
+			},
+			{
+				testName:           "File doesn't exist",
+				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
+				resourceWant:       nil,
+				errWant: &FileError{
+					ErrorReason: "No such file or directory",
+				},
 			},
 		}
 	default:

@@ -10,11 +10,14 @@ import (
 type FileQuery struct{}
 
 func (query FileQuery) Command() string {
-	return `stat %v --printf="Type=%F\nGroupID=%g\nGroupName=%G\nMode=%a\nOwnerID=%u\nOwnerName=%U\nSizeBytes=%s\nName=%n\nMountPoint=%m\nInodeNumber=%i\nNoOfHardLinks=%h\n"`
+	return `stat %v --printf="Type=%%F\nGroupID=%%g\nGroupName=%%G\nMode=%%a\nOwnerID=%%u\nOwnerName=%%U\nSizeBytes=%%s\nName=%%n\nMountPoint=%%m\nInodeNumber=%%i\nNoOfHardLinks=%%h\n"`
 }
 
 func (query FileQuery) ParseOutput(output string) (*File, error) {
-	file := &File{}
+	if strings.Contains(output, "No such file or directory") {
+		return nil, &FileError{ErrorReason: "No such file or directory"}
+	}
+	file := File{}
 
 	values := make(map[string]string)
 
@@ -50,11 +53,11 @@ func (query FileQuery) ParseOutput(output string) (*File, error) {
 		}
 
 		reflect.
-			ValueOf(file).
+			ValueOf(&file).
 			Elem().
 			FieldByName(intValueAttribute).
 			SetInt(int64(valueToSet))
 	}
 
-	return file, nil
+	return &file, nil
 }

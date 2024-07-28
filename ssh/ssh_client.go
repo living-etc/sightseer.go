@@ -1,7 +1,9 @@
 package ssh
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -9,9 +11,8 @@ import (
 type ResourceType interface{}
 
 type SshClient struct {
-	host     string
-	client   *ssh.Client
-	executor CommandExecutor
+	host   string
+	client *ssh.Client
 }
 
 func NewSshClient(privateKey []byte, host string, port string, user string) (*SshClient, error) {
@@ -34,9 +35,8 @@ func NewSshClient(privateKey []byte, host string, port string, user string) (*Ss
 	}
 
 	sshClient := &SshClient{
-		host:     host,
-		client:   client,
-		executor: RealCommandExecutor{client: client},
+		host:   host,
+		client: client,
 	}
 
 	return sshClient, nil
@@ -69,10 +69,7 @@ func get[T ResourceType, Q ResourceQuery[T]](
 ) (*T, error) {
 	command := fmt.Sprintf(query.Command(), identifier)
 
-	output, err := sshclient.executor.ExecuteCommand(command)
-	if err != nil {
-		return nil, err
-	}
+	output, err := sshclient.RunCommand(command)
 
 	var q Q
 	resource, err := q.ParseOutput(output)
@@ -83,10 +80,27 @@ func get[T ResourceType, Q ResourceQuery[T]](
 	return resource, nil
 }
 
-func (sshClient SshClient) Command(command string) (string, error) {
-	output, err := sshClient.executor.ExecuteCommand(command)
+func (sshClient SshClient) RunCommand(command string) (string, error) {
+	session, err := sshClient.client.NewSession()
 	if err != nil {
 		return "", err
 	}
-	return output, nil
+	defer session.Close()
+
+	var stdout, stderr bytes.Buffer
+	session.Stdout = &stdout
+	session.Stderr = &stderr
+
+	var output string
+
+	err = session.Run(command)
+	if err != nil {
+		output = stderr.String()
+	} else {
+		output = stdout.String()
+	}
+
+	output = strings.TrimSuffix(output, "\n")
+
+	return output, err
 }

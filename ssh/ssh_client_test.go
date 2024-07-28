@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -55,130 +54,60 @@ func VagrantSetup(machineName string) *SshClient {
 }
 
 func TestFile(t *testing.T) {
-	for _, testPlatform := range testPlatforms {
-		sshClient := VagrantSetup(testPlatform)
-
-		tests := TestCases.Get("File", testPlatform)
-
-		for _, testcase := range tests {
-			file, err := sshClient.File(testcase.resourceIdentifier)
-
-			t.Run(testcase.testName, func(t *testing.T) {
-				if err != nil {
-					containsErrorString := strings.Contains(
-						err.Error(),
-						"No such file or directory",
-					)
-
-					if !containsErrorString {
-						t.Errorf(
-							"Error failed:\nwanted err to contain:\t%v\ngot:\t\t\t%v",
-							"No such file or directory",
-							err.Error(),
-						)
-					}
-				} else {
-					if reflect.DeepEqual(file, testcase.resourceWant) {
-						t.Errorf("File failed:\nwant\t%v\ngot\t%v", testcase.resourceWant, file)
-					}
-				}
-			})
-		}
-	}
+	EvaluateTestCases[File, error]("File", t)
 }
 
 func TestService(t *testing.T) {
-	for _, testPlatform := range testPlatforms {
-		sshClient := VagrantSetup(testPlatform)
-
-		tests := TestCases.Get("Service", testPlatform)
-
-		for _, testcase := range tests {
-			service, err := sshClient.Service(testcase.resourceIdentifier)
-			if err != nil {
-				log.Fatalf("Error in %v: %v", testcase.resourceIdentifier, err)
-			}
-
-			t.Run(testcase.testName, func(t *testing.T) {
-				if !reflect.DeepEqual(service, testcase.resourceWant) {
-					t.Errorf(
-						"Service failed:\nwant:\t%v\ngot\t\t%v",
-						testcase.resourceWant,
-						service,
-					)
-				}
-			})
-		}
-	}
+	EvaluateTestCases[Service, error]("Service", t)
 }
 
 func TestUser(t *testing.T) {
-	for _, testPlatform := range testPlatforms {
-		sshClient := VagrantSetup(testPlatform)
-
-		tests := TestCases.Get("User", testPlatform)
-
-		for _, testcase := range tests {
-			user, err := sshClient.User(testcase.resourceIdentifier)
-			if err != nil {
-				t.Fatalf("Error in %v: %v", testcase.testName, err)
-			}
-
-			t.Run(testcase.testName, func(t *testing.T) {
-				if !reflect.DeepEqual(user, testcase.resourceWant) {
-					t.Fatalf("User failed:\nwant:\t%v\ngot:\t%v", testcase.resourceWant, user)
-				}
-			})
-		}
-	}
+	EvaluateTestCases[User, error]("User", t)
 }
 
 func TestSystemdTimer(t *testing.T) {
-	for _, testPlatform := range testPlatforms {
-		sshClient := VagrantSetup(testPlatform)
-
-		tests := TestCases.Get("SystemdTimer", testPlatform)
-
-		for _, testcase := range tests {
-			timer, err := sshClient.SystemdTimer(testcase.resourceIdentifier)
-			if err != nil {
-				if err.Error() != testcase.errWant.Error() {
-					t.Fatalf(
-						"SystemdTimer Error failed:\nwant:\t%v\ngot:\t%v",
-						testcase.errWant,
-						err,
-					)
-				}
-			} else {
-				t.Run(testcase.testName, func(t *testing.T) {
-					if !reflect.DeepEqual(timer, testcase.resourceWant) {
-						t.Fatalf("SystemdTimer failed:\nwant:\t%v\ngot:\t%v", testcase.resourceWant, timer)
-					}
-				})
-			}
-		}
-	}
+	EvaluateTestCases[SystemdTimer, *SystemdLoadError]("SystemdTimer", t)
 }
 
 func TestLinuxKernelParameter(t *testing.T) {
+	EvaluateTestCases[LinuxKernelParameter, error]("LinuxKernelParameter", t)
+}
+
+func EvaluateTestCases[T ResourceType, E error](resourceType string, t *testing.T) {
 	for _, testPlatform := range testPlatforms {
 		sshClient := VagrantSetup(testPlatform)
 
-		tests := TestCases.Get("LinuxKernelParameter", testPlatform)
+		tests := TestCases.Get(resourceType, testPlatform)
 
 		for _, testcase := range tests {
-			linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.resourceIdentifier)
-			if err != nil {
-				log.Fatalf("Error in %v: %v", testcase.resourceIdentifier, err)
-			}
+			testName := fmt.Sprintf("[%v][%v][%v]", resourceType, testcase.testName, testPlatform)
 
-			t.Run(testcase.testName, func(t *testing.T) {
-				if !reflect.DeepEqual(linuxKernelParameter, testcase.resourceWant) {
-					t.Errorf(
-						"LinuxKernelParameter failed:\nwant:\t%v\ngot:\t%v",
-						testcase.resourceWant,
-						linuxKernelParameter,
-					)
+			t.Run(testName, func(t *testing.T) {
+				methodValue := reflect.ValueOf(sshClient).MethodByName(resourceType)
+				if !methodValue.IsValid() {
+					log.Fatal("Method not found")
+				}
+
+				args := []reflect.Value{reflect.ValueOf(testcase.resourceIdentifier)}
+				results := methodValue.Call(args)
+
+				resourceGot := results[0].Interface().(*T)
+
+				if testcase.errWant != nil {
+					var err E
+					if results[1].Interface() != nil {
+						err = results[1].Interface().(E)
+					}
+
+					if err.Error() != testcase.errWant.Error() {
+						t.Fatalf("\nwant:\t%v\ngot:\t%v", testcase.errWant, err)
+					}
+				}
+
+				if testcase.resourceWant != nil {
+					if !reflect.DeepEqual(resourceGot, testcase.resourceWant) {
+						t.Fatalf("\nwant:\t%v\ngot:\t%v", testcase.resourceWant, resourceGot)
+					}
 				}
 			})
 		}
