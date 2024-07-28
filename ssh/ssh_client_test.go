@@ -56,9 +56,9 @@ func VagrantSetup(machineName string) *SshClient {
 
 func TestFile(t *testing.T) {
 	for _, testPlatform := range testPlatforms {
-		tests := TestCases.File(testPlatform)
-
 		sshClient := VagrantSetup(testPlatform)
+
+		tests := TestCases.Get("File", testPlatform)
 
 		for _, testcase := range tests {
 			file, err := sshClient.File(testcase.resourceIdentifier)
@@ -89,9 +89,9 @@ func TestFile(t *testing.T) {
 
 func TestService(t *testing.T) {
 	for _, testPlatform := range testPlatforms {
-		tests := TestCases.Service(testPlatform)
-
 		sshClient := VagrantSetup(testPlatform)
+
+		tests := TestCases.Get("Service", testPlatform)
 
 		for _, testcase := range tests {
 			service, err := sshClient.Service(testcase.resourceIdentifier)
@@ -114,9 +114,9 @@ func TestService(t *testing.T) {
 
 func TestUser(t *testing.T) {
 	for _, testPlatform := range testPlatforms {
-		tests := TestCases.User(testPlatform)
-
 		sshClient := VagrantSetup(testPlatform)
+
+		tests := TestCases.Get("User", testPlatform)
 
 		for _, testcase := range tests {
 			user, err := sshClient.User(testcase.resourceIdentifier)
@@ -137,7 +137,7 @@ func TestSystemdTimer(t *testing.T) {
 	for _, testPlatform := range testPlatforms {
 		sshClient := VagrantSetup(testPlatform)
 
-		tests := TestCases.SystemdTimer(testPlatform)
+		tests := TestCases.Get("SystemdTimer", testPlatform)
 
 		for _, testcase := range tests {
 			timer, err := sshClient.SystemdTimer(testcase.resourceIdentifier)
@@ -164,7 +164,7 @@ func TestLinuxKernelParameter(t *testing.T) {
 	for _, testPlatform := range testPlatforms {
 		sshClient := VagrantSetup(testPlatform)
 
-		tests := TestCases.LinuxKernelParameter(testPlatform)
+		tests := TestCases.Get("LinuxKernelParameter", testPlatform)
 
 		for _, testcase := range tests {
 			linuxKernelParameter, err := sshClient.LinuxKernelParameter(testcase.resourceIdentifier)

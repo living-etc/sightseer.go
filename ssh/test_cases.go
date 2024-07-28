@@ -13,6 +13,23 @@ type TestCase struct {
 	errWant            error
 }
 
+func (testCases) Get(resourceType string, platform string) []TestCase {
+	switch resourceType {
+	case "SystemdTimer":
+		return TestCases.SystemdTimer(platform)
+	case "LinuxKernelParameter":
+		return TestCases.LinuxKernelParameter(platform)
+	case "User":
+		return TestCases.User(platform)
+	case "Service":
+		return TestCases.Service(platform)
+	case "File":
+		return TestCases.File(platform)
+	default:
+		return []TestCase{}
+	}
+}
+
 func (testCases) File(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404", "fedora40":
