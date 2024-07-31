@@ -33,6 +33,7 @@
 - [] selinux
 - [] selinux module
 - [] systemd
+    - [] Handle the different load states
     - [x] service
     - [x] timer
     - [] socket
