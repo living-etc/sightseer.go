@@ -1,6 +1,6 @@
 package ssh
 
 type ResourceQuery[T ResourceType] interface {
-	Command() string
+	Command(string) string
 	ParseOutput(string) (*T, error)
 }

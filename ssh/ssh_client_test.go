@@ -36,8 +36,8 @@ var testMachines = map[string]VagrantMachineConfig{
 	},
 }
 
-func InitSshClient(machineName string) *SshClient {
-	machine := testMachines[machineName]
+func InitSshClient(platform string) *SshClient {
+	machine := testMachines[platform]
 
 	privateKey, err := os.ReadFile(
 		fmt.Sprintf(".vagrant/machines/%v/vmware_desktop/private_key", machine.name),
@@ -46,7 +46,7 @@ func InitSshClient(machineName string) *SshClient {
 		log.Fatalf("Error reading private key for %v", machine.name)
 	}
 
-	sshClient, err := NewSshClient(privateKey, machine.ip, machine.port, machine.user)
+	sshClient, err := NewSshClient(privateKey, machine.ip, machine.port, machine.user, platform)
 	if err != nil {
 		log.Fatalf("Error creating ssh client: %v", err)
 	}

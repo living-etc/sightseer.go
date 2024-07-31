@@ -11,11 +11,18 @@ import (
 type ResourceType interface{}
 
 type SshClient struct {
-	host   string
-	client *ssh.Client
+	host     string
+	client   *ssh.Client
+	platform string
 }
 
-func NewSshClient(privateKey []byte, host string, port string, user string) (*SshClient, error) {
+func NewSshClient(
+	privateKey []byte,
+	host string,
+	port string,
+	user string,
+	platform string,
+) (*SshClient, error) {
 	signer, err := ssh.ParsePrivateKey(privateKey)
 	if err != nil {
 		return nil, err
@@ -35,8 +42,9 @@ func NewSshClient(privateKey []byte, host string, port string, user string) (*Ss
 	}
 
 	sshClient := &SshClient{
-		host:   host,
-		client: client,
+		host:     host,
+		client:   client,
+		platform: platform,
 	}
 
 	return sshClient, nil
@@ -67,7 +75,7 @@ func get[T ResourceType, Q ResourceQuery[T]](
 	sshclient *SshClient,
 	query Q,
 ) (*T, error) {
-	command := fmt.Sprintf(query.Command(), identifier)
+	command := fmt.Sprintf(query.Command(sshclient.platform), identifier)
 
 	output, err := sshclient.RunCommand(command)
 

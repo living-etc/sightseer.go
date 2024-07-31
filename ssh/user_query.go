@@ -7,8 +7,11 @@ import (
 
 type UserQuery struct{}
 
-func (query UserQuery) Command() string {
-	return "grep -e ^%v: /etc/passwd"
+func (query UserQuery) Command(platform string) string {
+	switch platform {
+	default:
+		return "grep -e ^%v: /etc/passwd"
+	}
 }
 
 func (query UserQuery) ParseOutput(output string) (*User, error) {

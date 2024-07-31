@@ -10,8 +10,11 @@ import (
 
 type SystemdTimerQuery struct{}
 
-func (query SystemdTimerQuery) Command() string {
-	return "systemctl show %v"
+func (query SystemdTimerQuery) Command(platform string) string {
+	switch platform {
+	default:
+		return "systemctl show %v"
+	}
 }
 
 func (query SystemdTimerQuery) ParseOutput(output string) (*SystemdTimer, error) {

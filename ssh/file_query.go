@@ -9,8 +9,11 @@ import (
 
 type FileQuery struct{}
 
-func (query FileQuery) Command() string {
-	return `stat %v --printf="Type=%%F\nGroupID=%%g\nGroupName=%%G\nMode=%%a\nOwnerID=%%u\nOwnerName=%%U\nSizeBytes=%%s\nName=%%n\nMountPoint=%%m\nInodeNumber=%%i\nNoOfHardLinks=%%h\n"`
+func (query FileQuery) Command(platform string) string {
+	switch platform {
+	default:
+		return `stat %v --printf="Type=%%F\nGroupID=%%g\nGroupName=%%G\nMode=%%a\nOwnerID=%%u\nOwnerName=%%U\nSizeBytes=%%s\nName=%%n\nMountPoint=%%m\nInodeNumber=%%i\nNoOfHardLinks=%%h\n"`
+	}
 }
 
 func (query FileQuery) ParseOutput(output string) (*File, error) {
