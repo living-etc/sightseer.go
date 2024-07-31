@@ -6,11 +6,15 @@ import (
 
 type LinuxKernelParameterQuery struct{}
 
-func (query LinuxKernelParameterQuery) Command(platform string) string {
+func (query LinuxKernelParameterQuery) Command(platform string) (string, error) {
+	var cmd string
+
 	switch platform {
 	default:
-		return "sudo sysctl -a | grep --color=none %v"
+		cmd = "sudo sysctl -a | grep --color=none %v"
 	}
+
+	return cmd, nil
 }
 
 func (query LinuxKernelParameterQuery) ParseOutput(

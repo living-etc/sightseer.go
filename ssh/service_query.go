@@ -7,11 +7,15 @@ import (
 
 type ServiceQuery struct{}
 
-func (query ServiceQuery) Command(platform string) string {
+func (query ServiceQuery) Command(platform string) (string, error) {
+	var cmd string
+
 	switch platform {
 	default:
-		return "systemctl show %v --no-pager"
+		cmd = "systemctl show %v --no-pager"
 	}
+
+	return cmd, nil
 }
 
 func (query ServiceQuery) ParseOutput(output string) (*Service, error) {

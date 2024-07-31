@@ -9,11 +9,15 @@ import (
 
 type FileQuery struct{}
 
-func (query FileQuery) Command(platform string) string {
+func (query FileQuery) Command(platform string) (string, error) {
+	var cmd string
+
 	switch platform {
 	default:
-		return `stat %v --printf="Type=%%F\nGroupID=%%g\nGroupName=%%G\nMode=%%a\nOwnerID=%%u\nOwnerName=%%U\nSizeBytes=%%s\nName=%%n\nMountPoint=%%m\nInodeNumber=%%i\nNoOfHardLinks=%%h\n"`
+		cmd = `stat %v --printf="Type=%%F\nGroupID=%%g\nGroupName=%%G\nMode=%%a\nOwnerID=%%u\nOwnerName=%%U\nSizeBytes=%%s\nName=%%n\nMountPoint=%%m\nInodeNumber=%%i\nNoOfHardLinks=%%h\n"`
 	}
+
+	return cmd, nil
 }
 
 func (query FileQuery) ParseOutput(output string) (*File, error) {
