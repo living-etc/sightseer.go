@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"reflect"
 	"testing"
 )
@@ -35,7 +36,7 @@ var testMachines = map[string]VagrantMachineConfig{
 	},
 }
 
-func VagrantSetup(machineName string) *SshClient {
+func InitSshClient(machineName string) *SshClient {
 	machine := testMachines[machineName]
 
 	privateKey, err := os.ReadFile(
@@ -53,34 +54,43 @@ func VagrantSetup(machineName string) *SshClient {
 	return sshClient
 }
 
-func TestFile(t *testing.T) {
+func VagrantUp(t *testing.T) {
+	t.Log("[Vagrant Up] Launching vagrant VMs for testing")
+
+	cmd := exec.Command("vagrant", "up")
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func VagrantHalt(t *testing.T) {
+	t.Log("[Vagrant Halt] Halting vagrant VMs after testing")
+
+	cmd := exec.Command("vagrant", "halt")
+	if err := cmd.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestSshClient(t *testing.T) {
+	VagrantUp(t)
+	defer VagrantHalt(t)
+
 	EvaluateTestCases[File, error]("File", t)
-}
-
-func TestService(t *testing.T) {
 	EvaluateTestCases[Service, error]("Service", t)
-}
-
-func TestUser(t *testing.T) {
 	EvaluateTestCases[User, error]("User", t)
-}
-
-func TestSystemdTimer(t *testing.T) {
 	EvaluateTestCases[SystemdTimer, *SystemdLoadError]("SystemdTimer", t)
-}
-
-func TestLinuxKernelParameter(t *testing.T) {
 	EvaluateTestCases[LinuxKernelParameter, error]("LinuxKernelParameter", t)
 }
 
 func EvaluateTestCases[T ResourceType, E error](resourceType string, t *testing.T) {
 	for _, testPlatform := range testPlatforms {
-		sshClient := VagrantSetup(testPlatform)
+		sshClient := InitSshClient(testPlatform)
 
 		tests := TestCases.Get(resourceType, testPlatform)
 
 		for _, testcase := range tests {
-			testName := fmt.Sprintf("[%v][%v][%v]", resourceType, testcase.testName, testPlatform)
+			testName := fmt.Sprintf("%v/%v/%v", resourceType, testPlatform, testcase.testName)
 
 			t.Run(testName, func(t *testing.T) {
 				methodValue := reflect.ValueOf(sshClient).MethodByName(resourceType)
