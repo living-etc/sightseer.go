@@ -8,8 +8,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-type ResourceType interface{}
-
 type SshClient struct {
 	host     string
 	client   *ssh.Client
