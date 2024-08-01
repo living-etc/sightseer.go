@@ -80,10 +80,7 @@ func get[T ResourceType, Q ResourceQuery[T]](
 
 	cmdString := fmt.Sprintf(cmdTemplate, identifier)
 
-	output, err := sshclient.RunCommand(cmdString)
-	if err != nil {
-		return nil, err
-	}
+	output, _ := sshclient.RunCommand(cmdString)
 
 	var q Q
 	resource, err := q.ParseOutput(output)
