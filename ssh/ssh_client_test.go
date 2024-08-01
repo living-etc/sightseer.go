@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"reflect"
 	"testing"
 )
@@ -54,27 +53,27 @@ func InitSshClient(platform string) *SshClient {
 	return sshClient
 }
 
-func VagrantUp(t *testing.T) {
-	t.Log("[Vagrant Up] Launching vagrant VMs for testing")
-
-	cmd := exec.Command("vagrant", "up")
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func VagrantHalt(t *testing.T) {
-	t.Log("[Vagrant Halt] Halting vagrant VMs after testing")
-
-	cmd := exec.Command("vagrant", "halt")
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
-}
+//func VagrantUp(t *testing.T) {
+//	t.Log("[Vagrant Up] Launching vagrant VMs for testing")
+//
+//	cmd := exec.Command("vagrant", "up")
+//	if err := cmd.Run(); err != nil {
+//		log.Fatal(err)
+//	}
+//}
+//
+//func VagrantHalt(t *testing.T) {
+//	t.Log("[Vagrant Halt] Halting vagrant VMs after testing")
+//
+//	cmd := exec.Command("vagrant", "halt")
+//	if err := cmd.Run(); err != nil {
+//		log.Fatal(err)
+//	}
+//}
 
 func TestSshClient(t *testing.T) {
-	VagrantUp(t)
-	defer VagrantHalt(t)
+	// VagrantUp(t)
+	// defer VagrantHalt(t)
 
 	EvaluateTestCases[File, error]("File", t)
 	EvaluateTestCases[Service, error]("Service", t)
