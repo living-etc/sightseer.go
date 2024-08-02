@@ -10,4 +10,5 @@ func TestSshClient(t *testing.T) {
 	EvaluateTestCases[User, error]("User", t)
 	EvaluateTestCases[SystemdTimer, *SystemdLoadError]("SystemdTimer", t)
 	EvaluateTestCases[LinuxKernelParameter, error]("LinuxKernelParameter", t)
+	EvaluateTestCases[Package, error]("Package", t)
 }

@@ -68,6 +68,10 @@ func (sshclient *SshClient) LinuxKernelParameter(name string) (*LinuxKernelParam
 	return get(name, sshclient, LinuxKernelParameterQuery{})
 }
 
+func (sshclient *SshClient) Package(name string) (*Package, error) {
+	return get(name, sshclient, PackageQuery{})
+}
+
 func get[T ResourceType, Q ResourceQuery[T]](
 	identifier string,
 	sshclient *SshClient,

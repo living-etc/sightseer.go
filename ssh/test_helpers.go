@@ -82,7 +82,7 @@ func EvaluateTestCases[T ResourceType, E error](resourceType string, t *testing.
 
 			methodValue := reflect.ValueOf(sshClient).MethodByName(resourceType)
 			if !methodValue.IsValid() {
-				log.Fatal("Method not found")
+				log.Fatalf("Method '%v' not found on %v", resourceType, reflect.TypeOf(sshClient))
 			}
 
 			args := []reflect.Value{reflect.ValueOf(testcase.resourceIdentifier)}
