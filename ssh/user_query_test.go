@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"log"
-	"reflect"
 	"testing"
 )
 
@@ -54,10 +53,6 @@ func Test_userFromPasswd(t *testing.T) {
 			log.Fatalf("Error in %v: %v", testcase.testName, err)
 		}
 
-		t.Run(testcase.testName, func(t *testing.T) {
-			if !reflect.DeepEqual(user, testcase.userWant) {
-				t.Errorf("User failed:\nwant:\t%v\ngot:\t%v", testcase.userWant, user)
-			}
-		})
+		EvaluateStructTypesAreEqual(user, testcase.userWant, testcase.testName, t)
 	}
 }

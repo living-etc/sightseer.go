@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"log"
-	"reflect"
 	"testing"
 )
 
@@ -302,10 +301,6 @@ CollectMode=inactive
 			log.Fatalf("Error in %v: %v", testcase.name, err)
 		}
 
-		t.Run(testcase.name, func(t *testing.T) {
-			if !reflect.DeepEqual(service, testcase.serviceWant) {
-				t.Fatalf("Service failed:\nwant:\t%v\ngot:\t%v\n", testcase.serviceWant, service)
-			}
-		})
+		EvaluateStructTypesAreEqual(service, testcase.serviceWant, testcase.name, t)
 	}
 }

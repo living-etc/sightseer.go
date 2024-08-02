@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"log"
-	"reflect"
 	"testing"
 )
 
@@ -51,9 +50,7 @@ Mode=644
 				log.Fatalf("Error in %v: %v", tt.name, err)
 			}
 
-			if !reflect.DeepEqual(file, tt.fileWant) {
-				t.Errorf("File failed:\nwant:\t%v\ngot:\t%v", tt.fileWant, file)
-			}
+			EvaluateStructTypesAreEqual(file, tt.fileWant, tt.name, t)
 		}
 	})
 }

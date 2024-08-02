@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"log"
-	"reflect"
 	"testing"
 )
 
@@ -37,14 +36,6 @@ func Test_linuxKernelParameterParseOutput(t *testing.T) {
 			log.Fatalf("Error in %v: %v", testcase.name, err)
 		}
 
-		t.Run(testcase.name, func(t *testing.T) {
-			if !reflect.DeepEqual(linuxKernelParameter, testcase.parameterWant) {
-				t.Errorf(
-					"LinuxKernelParameter failed:\nwant:\t%v\ngot:\t%v",
-					testcase.parameterWant,
-					linuxKernelParameter,
-				)
-			}
-		})
+		EvaluateStructTypesAreEqual(linuxKernelParameter, testcase.parameterWant, testcase.name, t)
 	}
 }
