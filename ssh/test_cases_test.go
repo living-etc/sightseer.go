@@ -1,6 +1,10 @@
-package ssh
+package ssh_test
 
-import "time"
+import (
+	"time"
+
+	sightseer "github.com/living-etc/sightseer.go/ssh"
+)
 
 type testCases struct{}
 
@@ -32,12 +36,6 @@ func (testCases) Get(resourceType string, platform string) []TestCase {
 	}
 }
 
-type FileError struct {
-	ErrorReason string
-}
-
-func (err FileError) Error() string { return err.ErrorReason }
-
 func (testCases) File(platform string) []TestCase {
 	switch platform {
 	case "ubuntu2404":
@@ -45,7 +43,7 @@ func (testCases) File(platform string) []TestCase {
 			{
 				testName:           "File exists",
 				resourceIdentifier: "/home/vagrant/.bashrc",
-				resourceWant: &File{
+				resourceWant: &sightseer.File{
 					Type:          "regular file",
 					OwnerID:       1000,
 					OwnerName:     "vagrant",
@@ -64,7 +62,7 @@ func (testCases) File(platform string) []TestCase {
 				testName:           "File doesn't exist",
 				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
 				resourceWant:       nil,
-				errWant: &FileError{
+				errWant: &sightseer.FileError{
 					ErrorReason: "No such file or directory",
 				},
 			},
@@ -74,7 +72,7 @@ func (testCases) File(platform string) []TestCase {
 			{
 				testName:           "File exists",
 				resourceIdentifier: "/home/vagrant/.bashrc",
-				resourceWant: &File{
+				resourceWant: &sightseer.File{
 					Type:          "regular file",
 					OwnerID:       1000,
 					OwnerName:     "vagrant",
@@ -93,7 +91,7 @@ func (testCases) File(platform string) []TestCase {
 				testName:           "File doesn't exist",
 				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
 				resourceWant:       nil,
-				errWant: &FileError{
+				errWant: &sightseer.FileError{
 					ErrorReason: "No such file or directory",
 				},
 			},
@@ -110,7 +108,7 @@ func (testCases) Service(platform string) []TestCase {
 			{
 				testName:           "hello-world service is running",
 				resourceIdentifier: "hello-world.service",
-				resourceWant: &Service{
+				resourceWant: &sightseer.Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
@@ -125,7 +123,7 @@ func (testCases) Service(platform string) []TestCase {
 			{
 				testName:           "hello-world service is running",
 				resourceIdentifier: "hello-world.service",
-				resourceWant: &Service{
+				resourceWant: &sightseer.Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
@@ -147,7 +145,7 @@ func (testCases) User(platform string) []TestCase {
 			{
 				testName:           "User vagrant exists",
 				resourceIdentifier: "vagrant",
-				resourceWant: &User{
+				resourceWant: &sightseer.User{
 					Username:      "vagrant",
 					Uid:           1000,
 					Gid:           1000,
@@ -169,7 +167,7 @@ func (testCases) SystemdTimer(platform string) []TestCase {
 			{
 				testName:           "Logrotate timer exists",
 				resourceIdentifier: "logrotate.timer",
-				resourceWant: &SystemdTimer{
+				resourceWant: &sightseer.SystemdTimer{
 					Id:             "logrotate.timer",
 					Description:    "Daily rotation of log files",
 					LoadState:      "loaded",
@@ -197,7 +195,7 @@ func (testCases) SystemdTimer(platform string) []TestCase {
 				testName:           "Logrotate timer does not exist",
 				resourceIdentifier: "logrotate.timer",
 				resourceWant:       nil,
-				errWant: &SystemdLoadError{
+				errWant: &sightseer.SystemdLoadError{
 					UnitName:  "logrotate.timer",
 					LoadState: "not-found",
 					LoadError: `org.freedesktop.systemd1.NoSuchUnit "Unit logrotate.timer not found."`,
@@ -216,7 +214,7 @@ func (testCases) LinuxKernelParameter(platform string) []TestCase {
 			{
 				testName:           "Get a parameter",
 				resourceIdentifier: "vm.page_lock_unfairness",
-				resourceWant: &LinuxKernelParameter{
+				resourceWant: &sightseer.LinuxKernelParameter{
 					Value: "5",
 				},
 				errWant: nil,
@@ -234,7 +232,7 @@ func (testCases) Package(platform string) []TestCase {
 			{
 				testName:           "Package is installed",
 				resourceIdentifier: "openssh-server",
-				resourceWant: &Package{
+				resourceWant: &sightseer.Package{
 					Name:          "openssh-server",
 					Status:        "install ok installed",
 					Priority:      "optional",

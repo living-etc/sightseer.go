@@ -1,4 +1,4 @@
-package ssh
+package ssh_test
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"reflect"
 	"testing"
+
+	sightseer "github.com/living-etc/sightseer.go/ssh"
 )
 
 var testPlatforms = []string{
@@ -53,7 +55,7 @@ func EvaluateStructTypesAreEqual(got any, want any, testname string, t *testing.
 	})
 }
 
-func InitSshClient(platform string) *SshClient {
+func InitSshClient(platform string) *sightseer.SshClient {
 	machine := testMachines[platform]
 
 	privateKey, err := os.ReadFile(
@@ -63,7 +65,13 @@ func InitSshClient(platform string) *SshClient {
 		log.Fatalf("Error reading private key for %v", machine.name)
 	}
 
-	sshClient, err := NewSshClient(privateKey, machine.ip, machine.port, machine.user, platform)
+	sshClient, err := sightseer.NewSshClient(
+		privateKey,
+		machine.ip,
+		machine.port,
+		machine.user,
+		platform,
+	)
 	if err != nil {
 		log.Fatalf("Error creating ssh client: %v", err)
 	}
@@ -71,7 +79,7 @@ func InitSshClient(platform string) *SshClient {
 	return sshClient
 }
 
-func EvaluateTestCases[T ResourceType, E error](resourceType string, t *testing.T) {
+func EvaluateTestCases[T sightseer.ResourceType, E error](resourceType string, t *testing.T) {
 	for _, testPlatform := range testPlatforms {
 		sshClient := InitSshClient(testPlatform)
 

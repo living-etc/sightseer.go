@@ -1,20 +1,22 @@
-package ssh
+package ssh_test
 
 import (
 	"log"
 	"testing"
+
+	sightseer "github.com/living-etc/sightseer.go/ssh"
 )
 
 func Test_userFromPasswd(t *testing.T) {
 	tests := []struct {
 		testName     string
 		passwdOutput string
-		userWant     *User
+		userWant     *sightseer.User
 	}{
 		{
 			testName:     "User vagrant exists",
 			passwdOutput: `vagrant:x:1000:1000:vagrant:/home/vagrant:/bin/bash`,
-			userWant: &User{
+			userWant: &sightseer.User{
 				Username:      "vagrant",
 				Uid:           1000,
 				Gid:           1000,
@@ -25,7 +27,7 @@ func Test_userFromPasswd(t *testing.T) {
 		{
 			testName:     "empty entry",
 			passwdOutput: `::::::`,
-			userWant: &User{
+			userWant: &sightseer.User{
 				Username:      "",
 				Uid:           -1,
 				Gid:           -1,
@@ -36,7 +38,7 @@ func Test_userFromPasswd(t *testing.T) {
 		{
 			testName:     "special characters in the entries",
 			passwdOutput: `dhcpcd:x:100:65534:DHCP Client Daemon,,,:/usr/lib/dhcpcd:/bin/false`,
-			userWant: &User{
+			userWant: &sightseer.User{
 				Username:      "dhcpcd",
 				Uid:           100,
 				Gid:           65534,
@@ -47,7 +49,7 @@ func Test_userFromPasswd(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		var userQuery UserQuery
+		var userQuery sightseer.UserQuery
 		user, err := userQuery.ParseOutput(testcase.passwdOutput)
 		if err != nil {
 			log.Fatalf("Error in %v: %v", testcase.testName, err)

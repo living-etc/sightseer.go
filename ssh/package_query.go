@@ -11,8 +11,10 @@ func (query PackageQuery) Command(platform string) (string, error) {
 	var cmd string
 
 	switch platform {
-	default:
+	case "ubuntu2404":
 		cmd = "sudo dpkg -s %v"
+	case "fedora40":
+		cmd = "rpm -qi %v"
 	}
 
 	return cmd, nil
