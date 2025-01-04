@@ -82,23 +82,9 @@ func get[T ResourceType, Q ResourceQuery[T]](
 		return nil, err
 	}
 
-	cmdString := fmt.Sprintf(cmdTemplate, identifier)
-
-	output, _ := sshclient.RunCommand(cmdString)
-
-	var q Q
-	resource, err := q.ParseOutput(output)
+	session, err := sshclient.client.NewSession()
 	if err != nil {
 		return nil, err
-	}
-
-	return resource, nil
-}
-
-func (sshClient SshClient) RunCommand(command string) (string, error) {
-	session, err := sshClient.client.NewSession()
-	if err != nil {
-		return "", err
 	}
 	defer session.Close()
 
@@ -106,16 +92,23 @@ func (sshClient SshClient) RunCommand(command string) (string, error) {
 	session.Stdout = &stdout
 	session.Stderr = &stderr
 
-	var output string
+	var commandOutput string
 
+	command := fmt.Sprintf(cmdTemplate, identifier)
 	err = session.Run(command)
 	if err != nil {
-		output = stderr.String()
+		commandOutput = stderr.String()
 	} else {
-		output = stdout.String()
+		commandOutput = stdout.String()
 	}
 
-	output = strings.TrimSuffix(output, "\n")
+	commandOutput = strings.TrimSuffix(commandOutput, "\n")
 
-	return output, err
+	var q Q
+	resource, err := q.ParseOutput(commandOutput)
+	if err != nil {
+		return nil, err
+	}
+
+	return resource, nil
 }
