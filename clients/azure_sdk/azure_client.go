@@ -8,6 +8,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v2"
+
+	"github.com/living-etc/sightseer.go/entities/azure"
 )
 
 func check(err error, message string) {
@@ -22,12 +24,6 @@ type AzureClient struct {
 	credential        *azidentity.DefaultAzureCredential
 }
 
-type VM struct {
-	PrivateIPAddress string
-	PublicIPAddress  string
-	DnsName          string
-}
-
 func NewAzureClient(subscriptionId string, resourceGroupName string) AzureClient {
 	credential, err := azidentity.NewDefaultAzureCredential(nil)
 	check(err, "Failed to get OAuth config")
@@ -39,8 +35,8 @@ func NewAzureClient(subscriptionId string, resourceGroupName string) AzureClient
 	}
 }
 
-func (client AzureClient) VmFromName(name string) (VM, error) {
-	var result VM
+func (client AzureClient) VmFromName(name string) (azure.VM, error) {
+	var result azure.VM
 
 	subscriptionId := client.subscriptionId
 	resourceGroupName := client.resourceGroupName
