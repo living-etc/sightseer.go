@@ -1,8 +1,11 @@
-package kubernetes
+package kubectl_test
 
 import (
 	"errors"
 	"testing"
+
+	"github.com/living-etc/sightseer.go/clients/kubectl"
+	"github.com/living-etc/sightseer.go/entities/kubernetes"
 )
 
 const kubectloutput = `worker-1   Ready   <none>   15h   v1.21.0
@@ -25,7 +28,7 @@ type MockCommandExecutor struct {
 	MockError    error
 }
 
-func (executor MockCommandExecutor) executeCommand(
+func (executor MockCommandExecutor) ExecuteCommand(
 	binaru string,
 	args []string,
 ) (string, error) {
@@ -38,11 +41,11 @@ func TestWorkers(t *testing.T) {
 		MockError:    nil,
 	}
 
-	kubernetesClient := KubernetesClient{
-		kubeConfigPath:         "",
-		caCertPath:             "",
-		apiServierHost:         "",
-		kubectlCommandExecutor: mockKubectlCommandExecutor,
+	kubernetesClient := kubectl.KubernetesClient{
+		KubeConfigPath:         "",
+		CaCertPath:             "",
+		ApiServierHost:         "",
+		KubectlCommandExecutor: mockKubectlCommandExecutor,
 	}
 
 	workers, _ := kubernetesClient.Workers()
@@ -56,7 +59,7 @@ func TestWorkers(t *testing.T) {
 	})
 
 	t.Run("state of workers", func(t *testing.T) {
-		notReadyWorkers := []Worker{}
+		notReadyWorkers := []kubernetes.Worker{}
 		for _, worker := range workers {
 			if worker.Status != "Ready" {
 				notReadyWorkers = append(notReadyWorkers, worker)
@@ -80,11 +83,11 @@ func TestWorkers_AuthenticationError(t *testing.T) {
 		MockError:    kubectlErrorOutput,
 	}
 
-	kubernetesClient := KubernetesClient{
-		kubeConfigPath:         "",
-		caCertPath:             "",
-		apiServierHost:         "",
-		kubectlCommandExecutor: mockKubectlCommandExecutor,
+	kubernetesClient := kubectl.KubernetesClient{
+		KubeConfigPath:         "",
+		CaCertPath:             "",
+		ApiServierHost:         "",
+		KubectlCommandExecutor: mockKubectlCommandExecutor,
 	}
 
 	t.Run("authentication error", func(t *testing.T) {
