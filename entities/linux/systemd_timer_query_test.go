@@ -1,11 +1,11 @@
-package ssh_test
+package linux_test
 
 import (
 	"log"
 	"testing"
 	"time"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 func Test_systemdTimerFromSystemctl(t *testing.T) {
@@ -111,7 +111,7 @@ CollectMode=inactive
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var systemdTimerQuery sightseer.SystemdTimerQuery
+			var systemdTimerQuery linux.SystemdTimerQuery
 			timer, err := systemdTimerQuery.ParseOutput(tt.systemctlOutput)
 			if err != nil {
 				log.Fatalf("Error in %v: %v", tt.name, err)

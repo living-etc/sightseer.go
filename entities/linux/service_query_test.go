@@ -1,17 +1,17 @@
-package ssh_test
+package linux_test
 
 import (
 	"log"
 	"testing"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 func TestParseOutput(t *testing.T) {
 	tests := []struct {
 		name            string
 		systemctlOutput string
-		serviceWant     *sightseer.Service
+		serviceWant     *linux.Service
 	}{
 		{
 			name: "hello-world service",
@@ -286,7 +286,7 @@ SuccessAction=none
 InvocationID=f5aedca5bccf4487ac3af35164dc5aae
 CollectMode=inactive
 `,
-			serviceWant: &sightseer.Service{
+			serviceWant: &linux.Service{
 				Description:    "Simple service for testing against",
 				LoadState:      "loaded",
 				UnitFileState:  "enabled",
@@ -297,7 +297,7 @@ CollectMode=inactive
 	}
 
 	for _, testcase := range tests {
-		var serviceQuery sightseer.ServiceQuery
+		var serviceQuery linux.ServiceQuery
 		service, err := serviceQuery.ParseOutput(testcase.systemctlOutput)
 		if err != nil {
 			log.Fatalf("Error in %v: %v", testcase.name, err)

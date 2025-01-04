@@ -1,4 +1,4 @@
-package ssh
+package linux
 
 type FileError struct {
 	ErrorReason string

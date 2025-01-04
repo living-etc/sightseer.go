@@ -1,17 +1,17 @@
-package ssh_test
+package linux_test
 
 import (
 	"log"
 	"testing"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 func Test_packageFromDpkgOutput(t *testing.T) {
 	tests := []struct {
 		testname    string
 		dpkgoutput  string
-		packageWant *sightseer.Package
+		packageWant *linux.Package
 	}{
 		{
 			testname: "openssh-server is installed",
@@ -61,7 +61,7 @@ Description: secure shell (SSH) server, for secure access from remote machines
 Homepage: https://www.openssh.com/
 Original-Maintainer: Debian OpenSSH Maintainers <debian-ssh@lists.debian.org>
 `,
-			packageWant: &sightseer.Package{
+			packageWant: &linux.Package{
 				Name:          "openssh-server",
 				Status:        "install ok installed",
 				Priority:      "optional",
@@ -112,7 +112,7 @@ purposes.`,
 	}
 
 	for _, testcase := range tests {
-		var query sightseer.PackageQuery
+		var query linux.PackageQuery
 		packageGot, err := query.ParseOutput(testcase.dpkgoutput)
 		if err != nil {
 			log.Fatalf("Error in %v: %v", testcase.testname, err)

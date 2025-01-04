@@ -1,4 +1,4 @@
-package ssh
+package linux
 
 type File struct {
 	Type          string

@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/ssh"
+
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 type SshClient struct {
@@ -48,28 +50,28 @@ func NewSshClient(
 	return sshClient, nil
 }
 
-func (sshclient *SshClient) Service(name string) (*Service, error) {
-	return get(name, sshclient, ServiceQuery{})
+func (sshclient *SshClient) Service(name string) (*linux.Service, error) {
+	return get(name, sshclient, linux.ServiceQuery{})
 }
 
-func (sshclient *SshClient) File(name string) (*File, error) {
-	return get(name, sshclient, FileQuery{})
+func (sshclient *SshClient) File(name string) (*linux.File, error) {
+	return get(name, sshclient, linux.FileQuery{})
 }
 
-func (sshclient *SshClient) User(name string) (*User, error) {
-	return get(name, sshclient, UserQuery{})
+func (sshclient *SshClient) User(name string) (*linux.User, error) {
+	return get(name, sshclient, linux.UserQuery{})
 }
 
-func (sshclient *SshClient) SystemdTimer(name string) (*SystemdTimer, error) {
-	return get(name, sshclient, SystemdTimerQuery{})
+func (sshclient *SshClient) SystemdTimer(name string) (*linux.SystemdTimer, error) {
+	return get(name, sshclient, linux.SystemdTimerQuery{})
 }
 
-func (sshclient *SshClient) LinuxKernelParameter(name string) (*LinuxKernelParameter, error) {
-	return get(name, sshclient, LinuxKernelParameterQuery{})
+func (sshclient *SshClient) LinuxKernelParameter(name string) (*linux.LinuxKernelParameter, error) {
+	return get(name, sshclient, linux.LinuxKernelParameterQuery{})
 }
 
-func (sshclient *SshClient) Package(name string) (*Package, error) {
-	return get(name, sshclient, PackageQuery{})
+func (sshclient *SshClient) Package(name string) (*linux.Package, error) {
+	return get(name, sshclient, linux.PackageQuery{})
 }
 
 func get[T ResourceType, Q ResourceQuery[T]](

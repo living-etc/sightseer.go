@@ -1,4 +1,4 @@
-package ssh
+package linux
 
 type Service struct {
 	Description    string
