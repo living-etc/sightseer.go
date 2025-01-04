@@ -24,6 +24,8 @@ Vagrant.configure("2") do |config|
         mv /tmp/hello-world.service /etc/systemd/system/hello-world.service
         systemctl enable hello-world
         systemctl start hello-world
+
+        echo "127.0.0.1   fedora.localdomain fedora" >> /etc/hosts
         INLINE_SCRIPT
   end
 end
