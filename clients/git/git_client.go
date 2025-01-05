@@ -38,7 +38,7 @@ func (client *GitClient) IsValidRepo() error {
 	return nil
 }
 
-func (client *GitClient) Commit(identifier string) (*git.Commit, error) {
+func (client *GitClient) Show(ref string) (*git.Commit, error) {
 	formatParts := []string{
 		"{\"Hash\":\"%H\"",
 		"\"AbbreviatedHash\":\"%h\"",
@@ -97,7 +97,7 @@ func (client *GitClient) Commit(identifier string) (*git.Commit, error) {
 		"show",
 		"--no-patch",
 		fmt.Sprintf("--format=%s", strings.Join(formatParts, ",")),
-		identifier,
+		ref,
 	}
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 	cmd.Dir = client.path

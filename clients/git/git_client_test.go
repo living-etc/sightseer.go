@@ -11,7 +11,7 @@ import (
 	git "github.com/living-etc/sightseer.go/entities/git"
 )
 
-func TestNewGitClient(t *testing.T) {
+func TestShow(t *testing.T) {
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -74,7 +74,7 @@ func TestNewGitClient(t *testing.T) {
 	t.Run("new client", func(t *testing.T) {
 		gitClient := client.NewGitClient(repoDir)
 
-		head, err := gitClient.Commit("main")
+		head, err := gitClient.Show("main")
 		if err != nil {
 			t.Fatal(err)
 		}
