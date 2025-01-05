@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 
 	client "github.com/living-etc/sightseer.go/clients/git"
+	git "github.com/living-etc/sightseer.go/entities/git"
 )
 
 func TestNewGitClient(t *testing.T) {
@@ -18,7 +19,7 @@ func TestNewGitClient(t *testing.T) {
 
 	repoDir := filepath.Join(wd + "/testdata/git-client-test-repo-for-sightseer")
 
-	commitWant := &client.Commit{
+	commitWant := &git.Commit{
 		Hash:                           "108dd57ebe039833ad45f0e997fb68ad4fe49b6c",
 		AbbreviatedHash:                "108dd57",
 		TreeHash:                       "f93e3a1a1525fb5b91020da86e44810c87a2d7bc",
