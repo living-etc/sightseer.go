@@ -83,4 +83,12 @@ func TestNewGitClient(t *testing.T) {
 			t.Error(diff)
 		}
 	})
+
+	t.Run("Check Valid Repo", func(t *testing.T) {
+		gitClient := client.NewGitClient(repoDir)
+
+		if err := gitClient.IsValidRepo(); err != nil {
+			t.Fatalf("Not a valid git repo: %v", err)
+		}
+	})
 }

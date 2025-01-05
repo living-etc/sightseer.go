@@ -18,6 +18,26 @@ func NewGitClient(path string) GitClient {
 	return GitClient{path: path}
 }
 
+func (client *GitClient) IsValidRepo() error {
+	cmdParts := []string{
+		"git",
+		"git-revparse",
+		"--is-inside-working-tree",
+	}
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+	cmd.Dir = client.path
+
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return errors.New(stderr.String())
+	}
+	return nil
+}
+
 func (client *GitClient) Commit(identifier string) (*git.Commit, error) {
 	formatParts := []string{
 		"{\"Hash\":\"%H\"",
