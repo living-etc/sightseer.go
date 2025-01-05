@@ -1,0 +1,3 @@
+[submodule "clients/git/testdata/git-client-test-repo-for-sightseer"]
+	path = clients/git/testdata/git-client-test-repo-for-sightseer
+	url = git@github.com:living-etc/git-client-test-repo-for-sightseer.git
