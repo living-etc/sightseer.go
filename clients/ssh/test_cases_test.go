@@ -3,7 +3,7 @@ package ssh_test
 import (
 	"time"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 type testCases struct{}
@@ -43,7 +43,7 @@ func (testCases) File(platform string) []TestCase {
 			{
 				testName:           "File exists",
 				resourceIdentifier: "/home/vagrant/.bashrc",
-				resourceWant: &sightseer.File{
+				resourceWant: &linux.File{
 					Type:          "regular file",
 					OwnerID:       1000,
 					OwnerName:     "vagrant",
@@ -62,7 +62,7 @@ func (testCases) File(platform string) []TestCase {
 				testName:           "File doesn't exist",
 				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
 				resourceWant:       nil,
-				errWant: &sightseer.FileError{
+				errWant: &linux.FileError{
 					ErrorReason: "No such file or directory",
 				},
 			},
@@ -72,7 +72,7 @@ func (testCases) File(platform string) []TestCase {
 			{
 				testName:           "File exists",
 				resourceIdentifier: "/home/vagrant/.bashrc",
-				resourceWant: &sightseer.File{
+				resourceWant: &linux.File{
 					Type:          "regular file",
 					OwnerID:       1000,
 					OwnerName:     "vagrant",
@@ -91,7 +91,7 @@ func (testCases) File(platform string) []TestCase {
 				testName:           "File doesn't exist",
 				resourceIdentifier: "/home/vagrant/.bashrc.doesnt.exist",
 				resourceWant:       nil,
-				errWant: &sightseer.FileError{
+				errWant: &linux.FileError{
 					ErrorReason: "No such file or directory",
 				},
 			},
@@ -108,7 +108,7 @@ func (testCases) Service(platform string) []TestCase {
 			{
 				testName:           "hello-world service is running",
 				resourceIdentifier: "hello-world.service",
-				resourceWant: &sightseer.Service{
+				resourceWant: &linux.Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
@@ -123,7 +123,7 @@ func (testCases) Service(platform string) []TestCase {
 			{
 				testName:           "hello-world service is running",
 				resourceIdentifier: "hello-world.service",
-				resourceWant: &sightseer.Service{
+				resourceWant: &linux.Service{
 					Description:    "Simple service for testing against",
 					LoadState:      "loaded",
 					UnitFileState:  "enabled",
@@ -145,7 +145,7 @@ func (testCases) User(platform string) []TestCase {
 			{
 				testName:           "User vagrant exists",
 				resourceIdentifier: "vagrant",
-				resourceWant: &sightseer.User{
+				resourceWant: &linux.User{
 					Username:      "vagrant",
 					Uid:           1000,
 					Gid:           1000,
@@ -167,7 +167,7 @@ func (testCases) SystemdTimer(platform string) []TestCase {
 			{
 				testName:           "Logrotate timer exists",
 				resourceIdentifier: "logrotate.timer",
-				resourceWant: &sightseer.SystemdTimer{
+				resourceWant: &linux.SystemdTimer{
 					Id:             "logrotate.timer",
 					Description:    "Daily rotation of log files",
 					LoadState:      "loaded",
@@ -195,7 +195,7 @@ func (testCases) SystemdTimer(platform string) []TestCase {
 				testName:           "Logrotate timer does not exist",
 				resourceIdentifier: "logrotate.timer",
 				resourceWant:       nil,
-				errWant: &sightseer.SystemdLoadError{
+				errWant: &linux.SystemdLoadError{
 					UnitName:  "logrotate.timer",
 					LoadState: "not-found",
 					LoadError: `org.freedesktop.systemd1.NoSuchUnit "Unit logrotate.timer not found."`,
@@ -214,7 +214,7 @@ func (testCases) LinuxKernelParameter(platform string) []TestCase {
 			{
 				testName:           "Get a parameter",
 				resourceIdentifier: "vm.page_lock_unfairness",
-				resourceWant: &sightseer.LinuxKernelParameter{
+				resourceWant: &linux.LinuxKernelParameter{
 					Value: "5",
 				},
 				errWant: nil,
@@ -232,7 +232,7 @@ func (testCases) Package(platform string) []TestCase {
 			{
 				testName:           "Package is installed",
 				resourceIdentifier: "openssh-server",
-				resourceWant: &sightseer.Package{
+				resourceWant: &linux.Package{
 					Name:          "openssh-server",
 					Status:        "install ok installed",
 					Priority:      "optional",

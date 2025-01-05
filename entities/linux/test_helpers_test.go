@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"testing"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/clients/ssh"
 )
 
 var testPlatforms = []string{
@@ -55,7 +55,7 @@ func EvaluateStructTypesAreEqual(got any, want any, testname string, t *testing.
 	})
 }
 
-func InitSshClient(platform string) *sightseer.SshClient {
+func InitSshClient(platform string) *ssh.SshClient {
 	machine := testMachines[platform]
 
 	privateKey, err := os.ReadFile(
@@ -65,7 +65,7 @@ func InitSshClient(platform string) *sightseer.SshClient {
 		log.Fatalf("Error reading private key for %v", machine.name)
 	}
 
-	sshClient, err := sightseer.NewSshClient(
+	sshClient, err := ssh.NewSshClient(
 		privateKey,
 		machine.ip,
 		machine.port,
@@ -79,7 +79,7 @@ func InitSshClient(platform string) *sightseer.SshClient {
 	return sshClient
 }
 
-func EvaluateTestCases[T sightseer.ResourceType, E error](resourceType string, t *testing.T) {
+func EvaluateTestCases[T ssh.ResourceType, E error](resourceType string, t *testing.T) {
 	for _, testPlatform := range testPlatforms {
 		sshClient := InitSshClient(testPlatform)
 

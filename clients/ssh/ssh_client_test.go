@@ -3,14 +3,14 @@ package ssh_test
 import (
 	"testing"
 
-	sightseer "github.com/living-etc/sightseer.go/ssh"
+	"github.com/living-etc/sightseer.go/entities/linux"
 )
 
 func TestSshClient(t *testing.T) {
-	EvaluateTestCases[sightseer.File, error]("File", t)
-	EvaluateTestCases[sightseer.Service, error]("Service", t)
-	EvaluateTestCases[sightseer.User, error]("User", t)
-	EvaluateTestCases[sightseer.SystemdTimer, *sightseer.SystemdLoadError]("SystemdTimer", t)
-	EvaluateTestCases[sightseer.LinuxKernelParameter, error]("LinuxKernelParameter", t)
-	EvaluateTestCases[sightseer.Package, error]("Package", t)
+	EvaluateTestCases[linux.File, error]("File", t)
+	EvaluateTestCases[linux.Service, error]("Service", t)
+	EvaluateTestCases[linux.User, error]("User", t)
+	EvaluateTestCases[linux.SystemdTimer, *linux.SystemdLoadError]("SystemdTimer", t)
+	EvaluateTestCases[linux.LinuxKernelParameter, error]("LinuxKernelParameter", t)
+	EvaluateTestCases[linux.Package, error]("Package", t)
 }
