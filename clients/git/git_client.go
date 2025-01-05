@@ -21,7 +21,7 @@ func NewGitClient(path string) GitClient {
 func (client *GitClient) IsValidRepo() error {
 	cmdParts := []string{
 		"git",
-		"git-revparse",
+		"rev-parse",
 		"--is-inside-working-tree",
 	}
 	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
