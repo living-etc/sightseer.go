@@ -83,6 +83,15 @@ func TestShow(t *testing.T) {
 			t.Error(diff)
 		}
 	})
+}
+
+func TestIsValidRepo(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repoDir := filepath.Join(wd + "/testdata/git-client-test-repo-for-sightseer")
 
 	t.Run("Check Valid Repo", func(t *testing.T) {
 		gitClient := client.NewGitClient(repoDir)
