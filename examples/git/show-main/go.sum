@@ -1,0 +1,6 @@
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
+github.com/living-etc/sightseer.go v0.0.0-20250105194751-a2a27bedea50 h1:VaIPe51WS5TJWG+PrAO+KqOl5U7QcHVOOb4agOB6l4Q=
+github.com/living-etc/sightseer.go v0.0.0-20250105194751-a2a27bedea50/go.mod h1:7wVyHOlFmHtOtP2MEP85/CVhto7Mn6/D96fKiVdG3Kc=
+github.com/living-etc/sightseer.go v0.0.0-20250105233326-b7555493735e h1:4pEEeL9Gez3mUksO2AkEgFkC4CQSSCzWQUzEDRmO9pM=
+github.com/living-etc/sightseer.go v0.0.0-20250105233326-b7555493735e/go.mod h1:7wVyHOlFmHtOtP2MEP85/CVhto7Mn6/D96fKiVdG3Kc=
