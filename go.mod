@@ -1,6 +1,6 @@
 module github.com/living-etc/sightseer.go
 
-go 1.24rc1
+go 1.24.0
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.16.0
